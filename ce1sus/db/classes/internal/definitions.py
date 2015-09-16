@@ -196,6 +196,7 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
               'share': instance.convert_value(instance.share),
               'regex': instance.convert_value(instance.regex),
               'type_id': instance.convert_value(instance.value_type.uuid),
+              'type': instance.convert_value(instance.value_type.name),
               'default_condition_id': instance.convert_value(instance.default_condition.uuid),
               'chksum': instance.convert_value(instance.chksum),
               'cybox_std': instance.convert_value(instance.cybox_std)
@@ -205,7 +206,8 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
               'name': instance.convert_value(instance.name),
               'default_condition_id': instance.convert_value(instance.default_condition.uuid),
               'chksum': instance.convert_value(instance.chksum),
-              'cybox_std': instance.convert_value(instance.cybox_std)
+              'cybox_std': instance.convert_value(instance.cybox_std),
+              'type': instance.convert_value(instance.value_type.name),
               }
 
     parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)

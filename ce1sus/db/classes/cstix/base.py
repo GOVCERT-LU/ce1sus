@@ -54,7 +54,7 @@ class BaseCoreComponent(Entity):
 
   @declared_attr
   def information_source(self):
-    return relationship('InformationSource', secondary='rel_{0}_informationsource'.format(self.get_classname().lower()), uselist=False)
+    return relationship('InformationSource', secondary='rel_{0}_informationsource'.format(self.get_classname().lower()), uselist=False, back_populates=self.get_classname().lower())
 
   timestamp = Column(DateTime)
 

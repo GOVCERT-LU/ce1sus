@@ -8,6 +8,8 @@ Created on 7 Sep 2015
 from ce1sus.helpers.common.objects import get_fields
 
 from ce1sus.controllers.base import BaseController, ControllerException
+from ce1sus.controllers.common.path import PathController
+from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.classes.internal.attributes.attribute import Attribute, Condition
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.db.classes.internal.path import Path
@@ -50,9 +52,10 @@ class CyboxConverter(BaseController):
 
   def __init__(self, config, session=None):
     super(CyboxConverter, self).__init__(config, session)
+    self.condition_broker = self.broker_factory(ConditionBroker)
+    self.path_controller = self.controller_factory(PathController)
 
-
-  def set_base(self, instance, parent=None):
+  def set_base(self, instance, cache_object, parent=None):
     instance.path = Path()
     if parent:
       instance.tlp_level_id = parent.tlp_level_id
@@ -63,6 +66,9 @@ class CyboxConverter(BaseController):
       instance.creator_group = parent.creator_group
       instance.creator = parent.creator
       instance.modifier = parent.modifier
+      cache_object.permission_controller.set_properties_according_to_permisssions(instance, cache_object)
+
+
 
   def get_object_definition(self, instance, cache_object):
     try:
@@ -141,7 +147,7 @@ class CyboxConverter(BaseController):
           if isinstance(value, cybox.common.properties.String):
             definition = self.get_attribute_definition(field, name, cache_object)
             if definition:
-              attribute = self.map_attribute(definition, value, parent)
+              attribute = self.map_attribute(definition, '{0}'.format(value), parent, cache_object)
               # TODO: Map attribute condition
               parent.attributes.append(attribute)
           elif isinstance(value, cybox.Entity):
@@ -149,23 +155,34 @@ class CyboxConverter(BaseController):
           else:
             definition = self.get_attribute_definition(field, name, cache_object)
             if definition:
-              attribute = self.map_attribute(definition, value, parent)
+              attribute = self.map_attribute(definition, value, parent, cache_object)
               parent.attributes.append(attribute)
 
-  def map_attribute(self, definition, value, parent):
+  def map_attribute(self, definition, value, parent, cache_object):
     attribute = Attribute()
-    self.set_base(attribute, parent)
+    self.set_base(attribute, cache_object, parent=parent)
     attribute.object = parent
     attribute.definition = definition
     attribute.value = value
     if hasattr(value, 'condition'):
-      attribute.condition = Condition()
-      attribute.condition.value = value.condition
+      attribute.condition = self.get_condition(value.condition, cache_object)
     return attribute
+
+  def get_condition(self, value, cache_object):
+    condition = cache_object.seen_conditions.get(value, None)
+    if condition:
+      return condition
+    else:
+      try:
+        condition = self.condition_broker.get_condition_by_value(value)
+        cache_object.seen_conditions[value] = condition
+        return condition
+      except BrokerException as error:
+        raise CyboxConverterException(error)
 
   def map_object(self, instance, cache_object, parent):
     obj = Object()
-    self.set_base(obj, parent)
+    self.set_base(obj, cache_object, parent=parent)
     obj.id_ = instance.id_
     obj.idref = instance.idref
     obj.observable = parent

@@ -61,7 +61,7 @@ class Attribute(BaseElement, Base):
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
   condition_id = Column('condition_id', BigIntegerType, ForeignKey('conditions.condition_id', ondelete='restrict', onupdate='restrict'), index=True, default=None)
-  condition = relationship(Condition, uselist=False, secondary=_REL_ATTRIBUTE_CONDITIONS, single_parent=True)
+  condition = relationship(Condition, uselist=False, secondary=_REL_ATTRIBUTE_CONDITIONS)
 
   _PARENTS = ['object']
 

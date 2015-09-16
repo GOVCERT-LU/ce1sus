@@ -11,7 +11,6 @@ from sqlalchemy.schema import Column, ForeignKey
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
-from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.ttp.relations import _REL_INFRASTRUCTURE_STRUCTUREDTEXT, _REL_INFRASTRUCTURE_STRUCTUREDTEXT_SHORT
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
@@ -37,8 +36,8 @@ class Infrastructure(Entity, Base):
   resource = relationship('Resource')
 
   title = Column('title', UnicodeType(255), index=True, nullable=True)
-  description = relationship(StructuredText, secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT, uselist=False)
-  short_description = relationship(StructuredText, secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT_SHORT, uselist=False)
+  description = relationship('StructuredText', secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT, uselist=False)
+  short_description = relationship('StructuredText', secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT_SHORT, uselist=False)
 
 
   # custom ones related to ce1sus internals

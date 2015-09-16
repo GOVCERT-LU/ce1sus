@@ -47,6 +47,7 @@ class CacheObject(object):
     self.modified_set = False
     self.small = False
     self.loaded = False
+    self.uuids = list()
     if authorized_cache:
       self.authorized_cache = authorized_cache
     else:

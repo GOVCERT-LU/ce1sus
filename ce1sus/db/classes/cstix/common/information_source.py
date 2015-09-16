@@ -81,7 +81,7 @@ class InformationSource(Entity, Base):
                                       )
   
   time = relationship(CyboxTime, uselist=False,)
-  tools = relationship(ToolInformation, secondary=_REL_INFORMATIONSOURCE_TOOL)
+  tools = relationship(ToolInformation, secondary=_REL_INFORMATIONSOURCE_TOOL, back_populates='information_source')
 
   roles = relationship(InformationSourceRole)
   # TODO: references -> relation
@@ -122,7 +122,8 @@ class InformationSource(Entity, Base):
               'related_relatedindicator',
               'related_relatedthreatactor',
               'related_relatedttp',
-              'related_relatedindicator', ]
+              'related_relatedindicator',
+              'tool_information' ]
 
   related_relatedcoa = relationship('RelatedCOA', uselist=False, secondary=_REL_RELATEDCOA_INFORMATIONSOURCE)
   related_relatedcampaign = relationship('RelatedCampaign', uselist=False, secondary=_REL_RELATEDCAMPAIGN_INFORMATIONSOURCE)
@@ -145,11 +146,20 @@ class InformationSource(Entity, Base):
   base_test_mechanism = relationship('BaseTestMechanism', secondary=_REL_TESTMECHANISM_INFORMATIONSOURCE, uselist=False)
   markingspecification = relationship('MarkingSpecification', uselist=False, secondary=_REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE)
   campaign = relationship('Campaign', uselist=False, secondary=_REL_CAMPAIGN_INFORMATIONSOURCE)
-  exploit_target = relationship('ExploitTarget', uselist=False, secondary=_REL_EXPLOITTARGET_INFORMATIONSOURCE)
+  exploittarget = relationship('ExploitTarget', uselist=False, secondary=_REL_EXPLOITTARGET_INFORMATIONSOURCE)
+
   incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INFORMATIONSOURCE)
   threatactor = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_INFORMATIONSOURCE)
   ttp = relationship('TTP', uselist=False, secondary=_REL_TTP_INFORMATIONSOURCE)
-  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE)
+  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE, back_populates='information_source')
+
+  @property
+  def exploit_target(self):
+    return self.exploittarget
+
+  @exploit_target.setter
+  def exploit_target(self, value):
+    self.exploittarget = value
 
   def to_dict(self, cache_object):
     instance = self.get_instance([InformationSource.roles, InformationSource.identity, InformationSource.time], cache_object)

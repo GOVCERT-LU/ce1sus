@@ -82,7 +82,6 @@ class EventController(BaseController):
       # generate relations if needed!
 
       flat_attribtues = self.relations_controller.get_flat_attributes_for_event(event, cache_object)
-
       if (mkrelations == 'True' or mkrelations is True) and flat_attribtues:
         self.relations_controller.generate_bulk_attributes_relations(event, flat_attribtues, False)
 
@@ -135,7 +134,7 @@ class EventController(BaseController):
 
       for report in event.reports:
         self.report_controller.remove_report(report, cache_object, False)
-      self.common_controller.remove_path(event)
+      self.common_controller.remove_path(event, cache_object)
       self.event_broker.remove_by_id(event.identifier, False)
       self.event_broker.do_commit(True)
     except BrokerException as error:

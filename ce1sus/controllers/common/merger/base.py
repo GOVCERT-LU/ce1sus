@@ -165,7 +165,7 @@ class BaseMerger(BaseController):
           return 1
       else:
         # mark it for deletion if it is not the owner if it is not present anymore
-        if not merge_cache.owner:
+        if self.permission_controller.is_instance_owner(old_instance.path.event, merge_cache):
           self.mark_for_deletion(old_instance, merge_cache)
           self.logger.debug('{0} {1} is marked for deletion.'.format(old_instance.get_classname(), old_instance.uuid, old_instance.modified_on))
 
@@ -173,7 +173,7 @@ class BaseMerger(BaseController):
 
       if new_instance:
         #add
-        if not merge_cache.owner:
+        if not self.permission_controller.is_instance_owner(new_instance.path.event, merge_cache):
           self.mark_for_proposal(new_instance, merge_cache)
           self.logger.debug('{0} is marked for proposal.'.format(new_instance.get_classname(), new_instance.modified_on))
         return 0

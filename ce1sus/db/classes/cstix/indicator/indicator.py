@@ -91,7 +91,6 @@ class Indicator(BaseCoreComponent, Base):
   related_indicators = relationship('RelatedIndicator', secondary=_REL_INDICATOR_RELATED_INDICATOR)
   related_campaigns = relationship('RelatedCampaign', secondary=_REL_INDICATOR_RELATED_CAMPAIGN)
 
-
   _PARENTS = ['event', 'related_indicator']
   event = relationship('Event', secondary=_REL_EVENT_INDICATOR, uselist=False)
   related_indicator = relationship('RelatedIndicator', uselist=False, primaryjoin='RelatedIndicator.child_id==Indicator.identifier')
@@ -125,9 +124,8 @@ class Indicator(BaseCoreComponent, Base):
   related_packages = relationship('RelatedPackageRef', secondary=_REL_INDICATOR_RELATED_PACKAGES)
 
   def to_dict(self, cache_object):
-
+    cache_object.small = True
     instance = self.get_instance([Indicator.producer, Indicator.confidence], cache_object)
-
     observables = instance.attributelist_to_dict('observables', cache_object)
     observables_count = len(observables)
     if cache_object.complete:

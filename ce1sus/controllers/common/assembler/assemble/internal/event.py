@@ -251,6 +251,7 @@ class EventAssembler(BaseAssembler):
     handler_instance = definition.handler
     handler_instance.reference_definitions[definition.uuid] = definition
     handler_instance.group_broker = self.group_broker
+    handler_instance.path_controller = self.path_controller
 
     # Check if the handler requires additional attribute definitions
     additional_refs_defs_uuids = handler_instance.get_additinal_reference_uuids()

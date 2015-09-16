@@ -7,9 +7,11 @@ Created on 7 Sep 2015
 """
 from base64 import b64decode
 import cherrypy
+from json import dumps
 
 from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
+from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.handlers.base import HandlerException
 from ce1sus.mappers.stix.ce1susstix import Ce1susSTIX
@@ -60,9 +62,15 @@ class STIXHandler(AdapterHandlerBase):
       # start conversion
       xml_string = b64decode(data)
       if self.dump:
-        self.dump_file(filename, data)
+        self.dump_file(filename, xml_string)
       
       event = self.stix_converter.convert_stix_xml_string(xml_string, cache_object)
+      cache_object_copy = cache_object.make_copy()
+      cache_object_copy.complete = True
+      cache_object_copy.inflated = True
+      json_str = event.to_dict(cache_object_copy)
+
+      event = self.assembler.assemble(json_str, Event, None, cache_object)
       try:
         db_event = self.event_controller.get_event_by_uuid(event.uuid)
         self.logger.debug('Event {0} is in db merging'.format(event.uuid))

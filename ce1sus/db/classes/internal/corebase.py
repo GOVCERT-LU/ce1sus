@@ -14,7 +14,6 @@ from sqlalchemy.sql.schema import Column
 from sqlalchemy.types import BigInteger, Unicode, UnicodeText
 import uuid
 
-
 from ce1sus.common import convert_value
 
 
@@ -43,7 +42,6 @@ class UnicodeTextType(UnicodeText):
     self = self.with_variant(postgresql.TEXT(collation='utf8_unicode_ci'), 'postgresql')
     self = self.with_variant(mysql.TEXT(collation='utf8_unicode_ci'), 'mysql')
     self = self.with_variant(sqlite.TEXT(), 'sqlite')
-
 
 class BaseObject(object):
 

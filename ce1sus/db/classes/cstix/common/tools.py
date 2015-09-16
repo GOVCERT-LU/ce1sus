@@ -38,7 +38,7 @@ class ToolInformation(Entity, Base):
     self.set_id(value)
 
   _PARENTS = ['information_source', 'resource']
-  information_source = relationship('InformationSource', uselist=False, secondary=_REL_INFORMATIONSOURCE_TOOL)
+  information_source = relationship('InformationSource', uselist=False, secondary=_REL_INFORMATIONSOURCE_TOOL, back_populates='tools')
   resource = relationship('Resource', uselist=False, secondary='rel_resource_toolinformation')
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
@@ -47,9 +47,9 @@ class ToolInformation(Entity, Base):
   # TODO: Tool type 0..n
   description = relationship('StructuredText', secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT, uselist=False)
   # TODO: references ToolReference 0..n
-  vendor = Column('vendor', UnicodeType(255), index=True, nullable=False)
-  version_db = Column('version', UnicodeType(40), nullable=True)
-  service_pack = Column('service_pack', UnicodeType(255), index=True, nullable=False)
+  vendor = Column('vendor', UnicodeType(255), index=True)
+  version_db = Column('version', UnicodeType(40))
+  service_pack = Column('service_pack', UnicodeType(255), index=True)
   # TODO: Tool_Specific_Data 0..1
   # TODO: Tool hashes 0..n
   # TODO: Tool configuration 0..1

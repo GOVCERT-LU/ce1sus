@@ -17,6 +17,7 @@ from ce1sus.common.system import get_set_group
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.internal.common import Properties
+from ce1sus.db.classes.internal.path import Path
 
 
 __author__ = 'Weber Jean-Paul'
@@ -61,6 +62,7 @@ class HandlerBase(object):
     self.is_multi_line = False
     self.cache_object = None
     self.group_broker = None
+    self.path_controller = None
 
   def get_set_group(self, json, cache_object, return_none=False):
     return get_set_group(self.group_broker, json, cache_object, return_none)

@@ -85,54 +85,56 @@ class PermissionController(BaseController):
     return False
 
   def is_instance_viewable(self, instance, cache_object):
+    if instance:
+      # check if the element is in the session's cache
+      key = self.__get_cache_identifier(instance, cache_object.user, 'owner')
+      owner = cache_object.authorized_cache.get(key, False)
+      if owner:
+        return owner
 
-    # check if the element is in the session's cache
-    key = self.__get_cache_identifier(instance, cache_object.user, 'owner')
-    owner = cache_object.authorized_cache.get(key, False)
-    if owner:
-      return owner
+      key = self.__get_cache_identifier(instance, cache_object.user, 'view')
+      view = cache_object.authorized_cache.get(key, False)
+      if view:
+        return view
 
-    key = self.__get_cache_identifier(instance, cache_object.user, 'view')
-    view = cache_object.authorized_cache.get(key, False)
-    if view:
-      return view
+      # begin new checks
 
-    # begin new checks
-
-    self.logger.debug('Checking if instance {2} {0} is viewable by {1}'.format(instance.uuid, cache_object.user.group.name, instance.get_classname()))
-    if self.is_instance_owner(instance, cache_object):
-      return True
-    
-    # TODO: insert here new table
-    if hasattr(instance, 'path'):
-      path = instance.path
-      result = self.__check_properties(path.merged_properties, cache_object, key)
-      if result:
-        cache_object.authorized_cache[key] = True
-        return result
-  
-      # still no result checking as last the tlp lvls
-      user_tlp = self.get_max_tlp(cache_object.user.group)
-      if path.tlp_level_id >= user_tlp:
-        cache_object.authorized_cache[key] = True
+      self.logger.debug('Checking if instance {2} {0} is viewable by {1}'.format(instance.uuid, cache_object.user.group.name, instance.get_classname()))
+      if self.is_instance_owner(instance, cache_object):
         return True
-        # if the user group is in some way associated to the event
-      else:
-        event = path.event
 
-        grp_ids = list()
-        for group in cache_object.user.group.children:
-          grp_ids.append(group.identifier)
-        grp_ids.append(cache_object.user.group_id)
+      # TODO: insert here new table
+      if hasattr(instance, 'path'):
+        path = instance.path
+        result = self.__check_properties(path.merged_properties, cache_object, key)
+        if result:
+          cache_object.authorized_cache[key] = True
+          return result
+    
+        # still no result checking as last the tlp lvls
+        user_tlp = self.get_max_tlp(cache_object.user.group)
+        if path.tlp_level_id >= user_tlp:
+          cache_object.authorized_cache[key] = True
+          return True
+          # if the user group is in some way associated to the event
+        else:
+          event = path.event
 
-        for eventgroup in event.groups:
-          group = eventgroup.group
-          if group.identifier in grp_ids:
-            cache_object.authorized_cache[key] = True
-            return True
+          grp_ids = list()
+          for group in cache_object.user.group.children:
+            grp_ids.append(group.identifier)
+          grp_ids.append(cache_object.user.group_id)
 
-    cache_object.authorized_cache[key] = False
-    return False
+          for eventgroup in event.groups:
+            group = eventgroup.group
+            if group.identifier in grp_ids:
+              cache_object.authorized_cache[key] = True
+              return True
+  
+      cache_object.authorized_cache[key] = False
+      return False
+    else:
+      return True
 
   def can_user_update(self, instance, cache_object):
     self.logger.debug('Checking if instance {2} {0} can be modified by {1}'.format(instance.uuid, cache_object.user.group.name, instance.get_classname()))

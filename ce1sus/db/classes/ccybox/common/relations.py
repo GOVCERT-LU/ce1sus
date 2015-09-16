@@ -95,3 +95,23 @@ _REL_RECEIVEDTIME_DATETIMEWITHPRECISION = Table('rel_receivedtime_datetimewithpr
                                                      nullable=False,
                                                      index=True)
                                               )
+
+_REL_MEASURESOURCE_STRUCTUREDTEXT = Table('rel_measuresource_structuredtext', getattr(Base, 'metadata'),
+
+                                       Column('measuresource_id',
+                                              BigIntegerType,
+                                              ForeignKey('measuresources.measuresource_id',
+                                                         ondelete='cascade',
+                                                         onupdate='cascade'),
+                                              primary_key=True,
+                                              index=True,
+                                              nullable=False),
+                                       Column('structuredtext_id',
+                                             BigIntegerType,
+                                             ForeignKey('structuredtexts.structuredtext_id',
+                                                        ondelete='cascade',
+                                                        onupdate='cascade'),
+                                              primary_key=True,
+                                              nullable=False,
+                                              index=True)
+                                       )

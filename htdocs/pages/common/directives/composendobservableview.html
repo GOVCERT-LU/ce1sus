@@ -31,9 +31,9 @@
             <td style="background-color: #eaebff; width: 1%">{{composedobservable.observable_composition.operator}}</td>
             <td style="width: 99%">
               <!-- insert pagination here -->
-              <span  ng-repeat="observable in composedobservable.observable_composition.observables | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage">
-                <observable ng-if="!observable.observable_composition" observable="observable" indent="0" permissions="permissions"></observable>
-                <composed_observable ng-if="observable.observable_composition" composedobservable="observable" indent="0" permissions="permissions"></composed_observable>
+              <span  ng-repeat="com_observable in composedobservable.observable_composition.observables | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage">
+                <observable ng-if="!com_observable.observable_composition" observable="com_observable" indent="0" permissions="permissions"></observable>
+                <composedobservable ng-if="com_observable.observable_composition" composedobservable="com_observable" indent="0" permissions="event.userpermissions"></composedobservable>
               </span>
               <ul class="pagination" ng-if="1 < pagination.numPages">
                 <li ng-class="{ disabled : pagination.page == 0 }">

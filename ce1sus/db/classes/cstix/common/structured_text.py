@@ -11,6 +11,7 @@ from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
+from ce1sus.db.classes.ccybox.common.relations import _REL_MEASURESOURCE_STRUCTUREDTEXT
 from ce1sus.db.classes.ccybox.core.relations import _REL_OBSERVABLE_STRUCTUREDTEXT
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.campaign.relations import _REL_CAMPAIGN_STRUCTUREDTEXT, _REL_CAMPAIGN_STRUCTUREDTEXT_SHORT
@@ -29,8 +30,8 @@ from ce1sus.db.classes.cstix.ttp.relations import _REL_ATTACKPATTERN_STRUCTUREDT
   _REL_EXPLOIT_STRUCTUREDTEXT_SHORT, _REL_INFRASTRUCTURE_STRUCTUREDTEXT, _REL_INFRASTRUCTURE_STRUCTUREDTEXT_SHORT, _REL_MALWAREINSTANCE_STRUCTUREDTEXT, \
   _REL_MALWAREINSTANCE_STRUCTUREDTEXT_SHORT, _REL_TTP_STRUCTUREDTEXT, _REL_TTP_STRUCTUREDTEXT_SHORT
 from ce1sus.db.classes.internal.corebase import UnicodeType, UnicodeTextType
-from ce1sus.db.common.session import Base
 from ce1sus.db.classes.internal.relations import _REL_REPORT_STRUCTUREDTEXT
+from ce1sus.db.common.session import Base
 
 
 __author__ = 'Weber Jean-Paul'
@@ -97,6 +98,7 @@ class StructuredText(Entity, Base):
               'ttp_short_description',
               'incident_description',
               'incident_short_description',
+              'measuresource_description',
                ]
 
   observable_description = relationship('Observable', secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False)
@@ -141,7 +143,7 @@ class StructuredText(Entity, Base):
   indicator_short_description = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_STRUCTUREDTEXT_SHORT)
   report_description = relationship('Report', secondary=_REL_REPORT_STRUCTUREDTEXT, uselist=False)
   report_short_description = relationship('Report', secondary=_REL_REPORT_STRUCTUREDTEXT, uselist=False)
-
+  measuresource_description = relationship('MeasureSource', uselist=False, secondary=_REL_MEASURESOURCE_STRUCTUREDTEXT)
 
   def to_dict(self, cache_object):
     result = {'id_': self.convert_value(self.id_),

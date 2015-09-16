@@ -62,7 +62,7 @@ class MISPHandler(AdapterHandlerBase):
       # start conversion
       xml_string = b64decode(data)
       if self.dump:
-        self.dump_file(filename, data)
+        self.dump_file(filename, xml_string)
       
       if self.group_uuid:
         group = self.group_controller.get_group_by_uuid(self.group_uuid)

@@ -6,15 +6,25 @@
 Created on Nov 12, 2014
 """
 from ce1sus.helpers.common.objects import get_fields
+from datetime import datetime
 from lxml import etree
+import random
+from sqlalchemy.inspection import inspect
 from types import StringType
+import uuid
 
 from ce1sus.controllers.base import BaseController
+from ce1sus.controllers.common.path import PathController
 from ce1sus.controllers.events.event import EventController
+from ce1sus.db.classes.ccybox.core.observables import ObservableComposition, Observable
+from ce1sus.db.classes.cstix.common.information_source import InformationSource
+from ce1sus.db.classes.cstix.common.structured_text import StructuredText
+from ce1sus.db.classes.cstix.common.tools import ToolInformation
 from ce1sus.db.classes.cstix.extensions.test_mechanism.yara_test_mechanism import YaraTestMechanism
 from ce1sus.db.classes.internal.common import Properties
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.path import Path
+from ce1sus.db.common.broker import BrokerException
 from ce1sus.mappers.stix.common import get_fqcn, CLASS_MAP
 from ce1sus.mappers.stix.cyboxmapper import CyboxConverter
 import cybox
@@ -24,6 +34,7 @@ import stix
 from stix.common.vocabs import HighMediumLow
 from stix.core.stix_package import STIXPackage
 import stix.utils.idgen
+from ce1sus.db.classes.ccybox.common.measuresource import MeasureSource
 
 
 __author__ = 'Weber Jean-Paul'
@@ -31,7 +42,8 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-LIST_TYPES = {'cybox.core.observable.Observables': 'observables'}
+LIST_TYPES = {'cybox.core.observable.Observables': 'observables',
+              'stix.indicator.valid_time._ValidTimePositions': 'valid_time_positions'}
 
 class StixConverterException(Exception):
   pass
@@ -49,6 +61,8 @@ class STIXConverter(BaseController):
     else:
       raise StixConverterException(u'The base url was not specified in configuration')
     self.cybox_mapper = CyboxConverter(config, session)
+    self.path_controller = self.controller_factory(PathController)
+
   
   def __set_tlp_parent(self, instance, cache_object, color):
     if instance.tlp_level_id is None:
@@ -78,24 +92,55 @@ class STIXConverter(BaseController):
 
   def set_base(self, instance, stix_instance, cache_object, parent=None):
     instance.path = Path()
+
+
     if parent:
+      instance.parent = parent
       instance.tlp_level_id = parent.tlp_level_id
       instance.dbcode = parent.dbcode
-      instance.parent = parent
+
       if isinstance(parent, Event):
         instance.path.event = parent
       else:
         instance.path.event = parent.path.event
+
+    else:
+      instance.tlp = 'Amber'
+      instance.properties.is_shareable = True
+
+
     if hasattr(stix_instance, 'timestamp'):
-      instance.modified_on = stix_instance.timestamp.replace(tzinfo=None)
-      instance.created_on = stix_instance.timestamp.replace(tzinfo=None)
+      if stix_instance.timestamp:
+        instance.modified_on = stix_instance.timestamp.replace(tzinfo=None)
+        instance.created_on = stix_instance.timestamp.replace(tzinfo=None)
+      else:
+        instance.modified_on = datetime.utcnow()
+        instance.created_on = datetime.utcnow()
     else:
       instance.modified_on = parent.modified_on
       instance.created_on = parent.created_on
-    instance.creator_group = cache_object.user.group
-    instance.creator = cache_object.user
-    instance.modifier = cache_object.user
 
+
+    cache_object.permission_controller.set_properties_according_to_permisssions(instance, cache_object)
+
+    instance.creator_group = self.__get_user_group(cache_object)
+    instance.creator = self.__get_user(cache_object)
+    instance.modifier = self.__get_user(cache_object)
+
+
+  def __get_user(self, cache_object):
+    try:
+      insp = inspect(cache_object.user)
+      if insp.transient:
+        user = self.user_broker.getUserByUserName(cache_object.user.username)
+        cache_object.user = user
+      return cache_object.user
+    except BrokerException as error:
+      raise StixConverterException(error)
+
+  def __get_user_group(self, cache_object):
+    user = self.__get_user(cache_object)
+    return user.group
 
   def handle_markings(self, instance, cache_object, parent):
     result = list()
@@ -115,7 +160,10 @@ class STIXConverter(BaseController):
     return instance.value
 
   def map_object(self, instance, cache_object, parent):
-    return self.cybox_mapper.map_object(instance, cache_object, parent)
+    obj = self.cybox_mapper.map_object(instance, cache_object, parent)
+    if obj.uuid is None:
+      obj.uuid = uuid.uuid4()
+    return obj
 
   def handle_encodedCDATA(self, instance, cache_object, parent):
     value = instance.value
@@ -129,6 +177,7 @@ class STIXConverter(BaseController):
       if fqcn:
         clazz = CLASS_MAP.get(fqcn, None)
         ce1sus_instance = clazz()
+        self.set_base(ce1sus_instance, instance, cache_object, parent)
         ce1sus_instance.value = item.value
         result.append(ce1sus_instance)
       else:
@@ -136,6 +185,9 @@ class STIXConverter(BaseController):
 
     return result
 
+
+  def map_handling(self, value, cache_object, ce1sus_instance):
+    pass
 
 
   def map_instance(self, instance, cache_object, parent=None):
@@ -148,19 +200,26 @@ class STIXConverter(BaseController):
             return getattr(self, clazz)(instance, cache_object, parent)
           else:
             ce1sus_instance = clazz()
-            self.set_base(ce1sus_instance, instance, cache_object, parent)
+            self.set_base(ce1sus_instance, instance, cache_object, parent=parent)
             fields = get_fields(instance)
             for field in fields:
               value = getattr(instance, field)
               if value:
-                if isinstance(value, list):
+                new_value = None
+                if field == 'handling':
+                  self.map_handling(value, cache_object, ce1sus_instance)
+                elif isinstance(value, list):
                   new_value = list()
                   for item in value:
                     new_value.append(self.map_instance(item, cache_object, ce1sus_instance))
                 else:
                   new_value = self.map_instance(value, cache_object, ce1sus_instance)
+
                 if new_value:
                   setattr(ce1sus_instance, field, new_value)
+
+            if ce1sus_instance.uuid is None:
+              ce1sus_instance.uuid = uuid.uuid4()
             return ce1sus_instance
         else:
           attr_name = LIST_TYPES.get(fqcn, None)
@@ -168,6 +227,6 @@ class STIXConverter(BaseController):
             for item in getattr(instance, attr_name):
               getattr(parent, attr_name).append(self.map_instance(item, cache_object, parent))
           else:
-            raise StixConverterException('Cannot find map for class {0}'.format(fqcn))
+            raise StixConverterException('Cannot find map for class {0} of parent {1}'.format(fqcn, get_fqcn(parent)))
     else:
       return instance

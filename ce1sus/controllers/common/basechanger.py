@@ -6,6 +6,7 @@
 Created on Aug 5, 2015
 """
 from ce1sus.helpers.common import strings
+from sqlalchemy.inspection import inspect
 from uuid import uuid4
 import uuid
 
@@ -55,9 +56,11 @@ class BaseChanger(BaseController):
 
   def __get_user(self, cache_object):
     try:
-      user = self.user_broker.getUserByUserName(cache_object.user.username)
-      cache_object.user = user
-      return user
+      insp = inspect(cache_object.user)
+      if insp.transient:
+        user = self.user_broker.getUserByUserName(cache_object.user.username)
+        cache_object.user = user
+      return cache_object.user
     except BrokerException as error:
       raise BaseChangerException(error)
 

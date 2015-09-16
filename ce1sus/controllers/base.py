@@ -123,7 +123,8 @@ class BaseController(object):
       raise ValueError('Not cacheobject')
 
   def remove_set_base(self, instance, cache_object):
-    self.insert_set_base(instance, cache_object)
+    #self.insert_set_base(instance, cache_object)
+    pass
 
   def update_set_base(self, instance, cache_object):
     # self.insert_set_base(instance, cache_object)

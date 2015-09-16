@@ -173,6 +173,7 @@ class PseudoCyboxAssembler(BaseAssembler):
     handler_instance = definition.handler
     handler_instance.attribute_definitions[definition.uuid] = definition
     handler_instance.group_broker = self.group_broker
+    handler_instance.path_controller = self.path_controller
 
     # Check if the handler requires additional attribute definitions
     additional_attr_defs_uuids = handler_instance.get_additinal_attribute_uuids()
@@ -268,8 +269,6 @@ class PseudoCyboxAssembler(BaseAssembler):
       return obj
     elif changed_on == 2:
       return observable
-    else:
-      raise ValueError('Nothing was generated')
 
 
   def get_condition(self, uuid, cache_object):

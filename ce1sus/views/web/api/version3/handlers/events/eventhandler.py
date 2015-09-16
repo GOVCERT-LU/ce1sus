@@ -185,7 +185,7 @@ class EventHandler(RestBaseHandler):
       self.event_controller.update_event(event, cache_object, True, True)
       return self.__return_event(event, cache_object)
     elif method == 'DELETE':
-      self.check_if_is_deletable(event)
+      self.check_if_is_deletable(event, cache_object)
       self.event_controller.remove_event(event, cache_object)
       return 'Deleted event'
 

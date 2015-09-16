@@ -17,6 +17,7 @@ sys.path.insert(0, '../../../')
 # must be known as they are not imported by base -> polymorphic classes
 from ce1sus.common.dbinit import dbinit
 from ce1sus.helpers.common.config import Configuration
+from ce1sus.db.classes.ccybox.common.measuresource import MeasureSource
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'

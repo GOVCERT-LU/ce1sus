@@ -14,6 +14,7 @@ from uuid import uuid4
 
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.common.assembler.assembler import Assembler
+from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.cstix.common.identity import Identity
@@ -33,11 +34,11 @@ from ce1sus.db.classes.internal.common import Properties
 from ce1sus.db.classes.internal.definitions import AttributeDefinition, ObjectDefinition
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.object import Object
+from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.classes.internal.report import Report, Reference
 from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.mappers.misp.common import get_container_object_attribute, get_tlp, ANALYSIS_MAP, RISK_MAP
-from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -83,8 +84,11 @@ class MispConverter(BaseController):
     else:
       return element.text
 
-  def set_base(self, xml_element, instance, cache_object):
-    
+  def set_base(self, xml_element, instance, cache_object, event):
+    instance.path = Path()
+
+    instance.path.event = event
+
     distribution = MispConverter.__get_value(xml_element, 'distribution')
     timestamp = MispConverter.__get_value(xml_element, 'timestamp')
     uuid = MispConverter.__get_value(xml_element, 'uuid')
@@ -116,20 +120,12 @@ class MispConverter(BaseController):
     if hasattr(instance, 'namespace'):
       instance.namespace = MispConverter.NAMESPACE
 
-
   def __parse_attributes(self, xml_event, event, cache_object):
     self.logger.debug('Mapping MISP Attributes')
     
     xml_attributes = xml_event.iter(tag='Attribute')
     for xml_attribute in xml_attributes:
       self.__parse_misp_attribute(xml_attribute, event, cache_object)
-
-  def __assemble_text(self, xml_element, json, value, cache_object):
-    st = StructuredText()
-    self.set_base(xml_element, st, cache_object)
-    st.value = value
-    self.set_base(st, json, cache_object)
-    return st
 
   def __parse_misp_attribute(self, xml_attribute, event, cache_object):
     self.logger.debug('Mapping Attribute properties')
@@ -140,10 +136,10 @@ class MispConverter(BaseController):
     container, obj_def_name, attr_def_name = get_container_object_attribute(category, type_)
     if container and obj_def_name and attr_def_name:
       if container == 'Observable':
-        obs = self.__assemble_observable(obj_def_name, attr_def_name, xml_attribute, event, cache_object)
+        obs = self.__assemble_observable(obj_def_name, attr_def_name, xml_attribute, event, cache_object, event)
         event.observables.append(obs)
       elif container == 'Report':
-        report = self.__assemble_report(attr_def_name, xml_attribute, cache_object)
+        report = self.__assemble_report(attr_def_name, xml_attribute, cache_object, event)
         event.reports.append(report)
       else:
         # This case should not happen as the converter is rigid
@@ -153,7 +149,7 @@ class MispConverter(BaseController):
       #special cases like ip addresses
       if container == 'Observable':
         if 'ip' in type_:
-          obs = self.__assemble_ip_address(obj_def_name, type_, xml_attribute, event, cache_object)
+          obs = self.__assemble_ip_address(obj_def_name, type_, xml_attribute, event, cache_object, event)
         else:
           raise ControllerException('No special case defined for container {0} and object {1}'.format(container, obj_def_name))
       elif container == 'TTP':
@@ -167,7 +163,7 @@ class MispConverter(BaseController):
 
     else:
       # log this as error
-      obs = self.__assemble_errornous_observable(xml_attribute, event, cache_object)
+      obs = self.__assemble_errornous_observable(xml_attribute, event, cache_object, event)
       event.observables.append(obs)
 
   def __assemble_test_mechanism_indicator(self, obj_def_name, xml_attribute, event, cache_object):
@@ -175,13 +171,13 @@ class MispConverter(BaseController):
     
     if obj_def_name == 'SnortTestMechanism':
       snort = SnortTestMechanism()
-      self.set_base(xml_attribute, snort, cache_object)
+      self.set_base(xml_attribute, snort, cache_object, event)
 
-      snort.producer = self.get_information_source(xml_attribute, cache_object)
+      snort.producer = self.get_information_source(xml_attribute, cache_object, event)
       
       
       snort_rule = SnortRule()
-      self.set_base(xml_attribute, snort_rule, cache_object)
+      self.set_base(xml_attribute, snort_rule, cache_object, event)
       snort_rule.uuid = uuid4()
 
       snort_rule.rule = value 
@@ -189,9 +185,9 @@ class MispConverter(BaseController):
       
     elif obj_def_name == 'YaraTestMechanism':
       yara = YaraTestMechanism()
-      self.set_base(xml_attribute, yara, cache_object)
+      self.set_base(xml_attribute, yara, cache_object, event)
 
-      yara.producer = self.get_information_source(xml_attribute, cache_object)
+      yara.producer = self.get_information_source(xml_attribute, cache_object, event)
 
       yara.rule = value
 
@@ -203,17 +199,17 @@ class MispConverter(BaseController):
     timestamp = datetime.utcfromtimestamp(int(timestamp))
 
     ttp = TTP()
-    self.set_base(xml_attribute, ttp, cache_object)
+    self.set_base(xml_attribute, ttp, cache_object, event)
     ttp.timestamp = timestamp
     if type_ == 'vulnerability':
       vulnerability = Vulnerability()
-      self.set_base(xml_attribute, vulnerability, cache_object)
+      self.set_base(xml_attribute, vulnerability, cache_object, event)
       vulnerability.uuid = uuid4()
 
       # add the vulnerability to the root
 
       exploit_target = ExploitTarget()
-      self.set_base(xml_attribute, exploit_target, cache_object)
+      self.set_base(xml_attribute, exploit_target, cache_object, event)
       exploit_target.uuid = uuid4()
       exploit_target.timestamp = timestamp
       exploit_target.vulnerabilities.append(vulnerability)
@@ -221,7 +217,7 @@ class MispConverter(BaseController):
       event.exploit_targets.append(exploit_target)
 
       ttp_exploit_target = ExploitTarget()
-      self.set_base(xml_attribute, ttp_exploit_target, cache_object)
+      self.set_base(xml_attribute, ttp_exploit_target, cache_object, event)
       ttp_exploit_target.uuid = uuid4()
       ttp_exploit_target.idref = exploit_target.id_
 
@@ -234,18 +230,18 @@ class MispConverter(BaseController):
       self.set_base(xml_attribute, malware, cache_object)
       malware.uuid = uuid4()
       name = Name()
-      self.set_base(xml_attribute, name, cache_object)
+      self.set_base(xml_attribute, name, cache_object, event)
       name.name = value
 
       malware.names.append(name)
 
       ttp.behavior = Behavior()
-      self.set_base(xml_attribute, ttp.behavior, cache_object)
+      self.set_base(xml_attribute, ttp.behavior, cache_object, event)
       ttp.behavior.uuid = uuid4()
       ttp.behavior.malware_instances.append(malware)
     event.ttps.append(ttp)
 
-  def __assemble_ip_address(self, obj_def_name, type_, xml_attribute, parent, cache_object):
+  def __assemble_ip_address(self, obj_def_name, type_, xml_attribute, parent, cache_object, event):
     value = MispConverter.__get_value(xml_attribute, 'value')
 
     # determine if is network
@@ -259,7 +255,7 @@ class MispConverter(BaseController):
     else:
       attr_def_name = 'ipv6_net'
 
-    obs = self.__assemble_observable(obj_def_name, attr_def_name, xml_attribute, parent, cache_object)
+    obs = self.__assemble_observable(obj_def_name, attr_def_name, xml_attribute, parent, cache_object, event)
 
 
     is_type = None
@@ -269,7 +265,7 @@ class MispConverter(BaseController):
       is_type = 'Destination'
 
     if is_type:
-      attribute = self.__assemble_attribute(obs.object, xml_attribute, 'is_type', cache_object)
+      attribute = self.__assemble_attribute(obs.object, xml_attribute, 'is_type', cache_object, event)
       attribute.uuid = uuid4()
       attribute.value = is_type
       obs.object.attributes.append(attribute)
@@ -291,7 +287,7 @@ class MispConverter(BaseController):
         raise ControllerException('Cannot find the correct object definition for {0}'.format(def_name))
 
   
-  def __assemble_report(self, ref_def_name, xml_attribute, cache_object):
+  def __assemble_report(self, ref_def_name, xml_attribute, cache_object, event):
     comment = MispConverter.__get_value(xml_attribute, 'comment')
     category = MispConverter.__get_value(xml_attribute, 'category')
     value = MispConverter.__get_value(xml_attribute, 'value')
@@ -299,19 +295,19 @@ class MispConverter(BaseController):
     type_ = MispConverter.__get_value(xml_attribute, 'type')
 
     report = Report()
-    self.set_base(xml_attribute, report, cache_object)
+    self.set_base(xml_attribute, report, cache_object, event)
     report.uuid = uuid4()
 
     if comment:
       report.description = comment
       
-    reference = self.__assemble_reference(xml_attribute, ref_def_name, cache_object)
+    reference = self.__assemble_reference(xml_attribute, ref_def_name, cache_object, event)
     if data:
       # set for files as this is a data element
       reference.value = {'name': value, 'data': data}
     else:
       if type_ == 'link':
-        reference2 = self.__assemble_reference(xml_attribute, 'comment', cache_object)
+        reference2 = self.__assemble_reference(xml_attribute, 'comment', cache_object, event)
         reference2.value = category
         report.references.append(reference2)
         reference.value = value
@@ -322,9 +318,9 @@ class MispConverter(BaseController):
 
     return report
   
-  def __assemble_reference(self, xml_attribute, ref_def_name, cache_object):
+  def __assemble_reference(self, xml_attribute, ref_def_name, cache_object, event):
     reference = Reference()
-    self.set_base(xml_attribute, reference, cache_object)
+    self.set_base(xml_attribute, reference, cache_object, event)
     reference.uuid = uuid4()
     reference.definition = self.get_reference_definition(ref_def_name, cache_object)
     return reference
@@ -371,13 +367,13 @@ class MispConverter(BaseController):
         self.logger.error(error)
         raise ControllerException('Cannot find the correct attribute definition for {0}'.format(def_name))
 
-  def __assemble_structured_text(self, xml_element, value, cache_object):
+  def __assemble_structured_text(self, xml_element, value, cache_object, event):
     st = StructuredText()
-    self.set_base(xml_element, st, cache_object)
+    self.set_base(xml_element, st, cache_object, event)
     st.value = value
     return None
   
-  def __assemble_errornous_observable(self, xml_attribute, parent, cache_object):
+  def __assemble_errornous_observable(self, xml_attribute, parent, cache_object, event):
     self.logger.debug('Assembling bogus Observable for a MISP Event')
 
     comment = MispConverter.__get_value(xml_attribute, 'comment')
@@ -385,19 +381,19 @@ class MispConverter(BaseController):
     category = MispConverter.__get_value(xml_attribute, 'category')
     
     observable = Observable()
-    self.set_base(xml_attribute, observable, cache_object)
+    self.set_base(xml_attribute, observable, cache_object, event)
     observable.uuid = uuid4()
     observable.parent = parent
     if comment:
-      observable.description = self.__assemble_structured_text(xml_attribute, comment, cache_object)
+      observable.description = self.__assemble_structured_text(xml_attribute, comment, cache_object, event)
 
 
     obj = Object()
-    self.set_base(xml_attribute, obj, cache_object)
+    self.set_base(xml_attribute, obj, cache_object, event)
     obj.uuid = uuid4()
     # definition
     obj.definition = ObjectDefinition()
-    self.set_base(xml_attribute, obj.definition, cache_object)
+    self.set_base(xml_attribute, obj.definition, cache_object, event)
     obj.definition.uuid = uuid4()
     obj.definition.name = 'Unknown'
 
@@ -407,7 +403,7 @@ class MispConverter(BaseController):
 
       # get_attribute definition
     attribute = Attribute()
-    self.set_base(xml_attribute, attribute, cache_object)
+    self.set_base(xml_attribute, attribute, cache_object, event)
     attribute_definition = self.get_attribute_definition('comment', cache_object)
     attribute.definition = attribute_definition
     attribute.object = obj
@@ -417,7 +413,7 @@ class MispConverter(BaseController):
 
     attribute.value = u'[{0}{1}]: {2}'.format(category, type_, value)
     attribute.definition = AttributeDefinition()
-    self.set_base(xml_attribute, attribute.definition, cache_object)
+    self.set_base(xml_attribute, attribute.definition, cache_object, event)
     attribute.definition.uuid = uuid4()
     attribute.definition.name = 'Unknown'
     attribute.definition.attribute_handler = attribute_definition.attribute_handler
@@ -428,22 +424,22 @@ class MispConverter(BaseController):
 
     return observable
 
-  def __assemble_observable(self, obj_def_name, attr_def_name, xml_attribute, parent, cache_object):
+  def __assemble_observable(self, obj_def_name, attr_def_name, xml_attribute, parent, cache_object, event):
     self.logger.debug('Assembling Observable for a MISP Event')
 
     comment = MispConverter.__get_value(xml_attribute, 'comment')
     type_ = MispConverter.__get_value(xml_attribute, 'type')
     
     observable = Observable()
-    self.set_base(xml_attribute, observable, cache_object)
+    self.set_base(xml_attribute, observable, cache_object, event)
     observable.uuid = uuid4()
     observable.parent = parent
     if comment:
-      observable.description = self.__assemble_structured_text(xml_attribute, comment, cache_object)
+      observable.description = self.__assemble_structured_text(xml_attribute, comment, cache_object, event)
 
 
     obj = Object()
-    self.set_base(xml_attribute, obj, cache_object)
+    self.set_base(xml_attribute, obj, cache_object, event)
     obj.uuid = uuid4()
     # definition
     obj.definition = self.get_object_definition(obj_def_name, cache_object)
@@ -462,26 +458,26 @@ class MispConverter(BaseController):
       else:
         raise ControllerException('Fist element {0} in piped definition is unkown'.format(type1))
       
-      attribute1 = self.__assemble_attribute(obj, xml_attribute, additional_attr_def_name, cache_object)
+      attribute1 = self.__assemble_attribute(obj, xml_attribute, additional_attr_def_name, cache_object, event)
       obj.attributes.append(attribute1)
-      attribute2 = self.__assemble_attribute(obj, xml_attribute, attr_def_name, cache_object)
+      attribute2 = self.__assemble_attribute(obj, xml_attribute, attr_def_name, cache_object, event)
       obj.attributes.append(attribute2)
 
     else:
       # get_attribute definition
-      attribute = self.__assemble_attribute(obj, xml_attribute, attr_def_name, cache_object)
+      attribute = self.__assemble_attribute(obj, xml_attribute, attr_def_name, cache_object, event)
       obj.attributes.append(attribute)
     return observable
 
 
-  def __assemble_attribute(self, obj, xml_attribute, attr_def_name, cache_object):
+  def __assemble_attribute(self, obj, xml_attribute, attr_def_name, cache_object, event):
     ioc = MispConverter.__get_value(xml_attribute, 'to_ids')
     value = MispConverter.__get_value(xml_attribute, 'value')
     data = MispConverter.__get_value(xml_attribute, 'data')
     
     attribute_definition = self.get_attribute_definition(attr_def_name, cache_object)
     attribute = Attribute()
-    self.set_base(xml_attribute, attribute, cache_object)
+    self.set_base(xml_attribute, attribute, cache_object, event)
     attribute.definition = attribute_definition
     attribute.object = obj
     attribute.condition = Condition()
@@ -494,45 +490,45 @@ class MispConverter(BaseController):
     attribute.is_ioc = ioc == '1'
     return attribute
 
-  def __assemble_information_source(self, name, role_name, xml_element, cache_object):
+  def __assemble_information_source(self, name, role_name, xml_element, cache_object, event):
     identity = Identity()
-    self.set_base(xml_element, identity, cache_object)
+    self.set_base(xml_element, identity, cache_object, event)
     identity.uuid = uuid4()
     identity.name = name
     information_source = InformationSource()
-    self.set_base(xml_element, information_source, cache_object)
+    self.set_base(xml_element, information_source, cache_object, event)
     information_source.uuid = uuid4()
     information_source.identity = identity
     if role_name:
-      role = self.__assemble_role(role_name, xml_element, cache_object)
+      role = self.__assemble_role(role_name, xml_element, cache_object, event)
       information_source.roles.append(role)
     return information_source
     
-  def __assemble_role(self, role_name, xml_element, cache_object):
+  def __assemble_role(self, role_name, xml_element, cache_object, event):
     role = InformationSourceRole()
-    self.set_base(xml_element, role, cache_object)
+    self.set_base(xml_element, role, cache_object, event)
     role.uuid = uuid4()
     role.role = role_name
     return role
   
-  def get_information_source(self, xml_element, cache_object):
+  def get_information_source(self, xml_element, cache_object, event):
     infromation_source = cache_object.information_source
     
-    isref = self.__assemble_information_source(infromation_source.identity.name, None, xml_element, cache_object)
+    isref = self.__assemble_information_source(infromation_source.identity.name, None, xml_element, cache_object, event)
     isref.identity.name = None
     isref.identity.uuid = uuid4()
     isref.identity.idref = infromation_source.identity.id_
 
     for role in infromation_source.roles:
-      isrefrole = self.__assemble_role(role.role, xml_element, cache_object)
+      isrefrole = self.__assemble_role(role.role, xml_element, cache_object, event)
       isref.roles.append(isrefrole)
 
     for contributing_source in infromation_source.contributing_sources:
-      csref = self.__assemble_information_source(contributing_source.identity.name, None, xml_element, cache_object)
+      csref = self.__assemble_information_source(contributing_source.identity.name, None, xml_element, cache_object, event)
       csref.identity.name = None
       csref.identity.idref = infromation_source.identity.id_
       for role in contributing_source.roles:
-        csrefrole = self.__assemble_role(role.role, xml_element, cache_object)
+        csrefrole = self.__assemble_role(role.role, xml_element, cache_object, event)
         csref.roles.append(csrefrole)
 
     return isref
@@ -558,29 +554,29 @@ class MispConverter(BaseController):
 
 
     event = Event()
-    self.set_base(xml_event, event, cache_object)
+    self.set_base(xml_event, event, cache_object, None)
 
     # event.title = u'{0}Event {1} - {2}'.format(title_prefix, misp_id, info)
       
     event.stix_header = STIXHeader()
-    self.set_base(xml_event, event.stix_header, cache_object)
+    self.set_base(xml_event, event.stix_header, cache_object, event)
 
     event.stix_header.title = u'{0} Event {1} - {2}'.format(MispConverter.NAMESPACE, misp_id, info)
-    event.stix_header.description = self.__assemble_structured_text(xml_event, info, cache_object)
-    event.stix_header.short_description = self.__assemble_structured_text(xml_event, info, cache_object)
+    event.stix_header.description = self.__assemble_structured_text(xml_event, info, cache_object, event)
+    event.stix_header.short_description = self.__assemble_structured_text(xml_event, info, cache_object, event)
 
     # org = provenance, this group will also get an entry in the event permissions with all the rights
 
     if orgc:
-      information_source = self.__assemble_information_source(orgc, 'Initial Author', xml_event, cache_object)
+      information_source = self.__assemble_information_source(orgc, 'Initial Author', xml_event, cache_object, event)
       if org != orgc:
         information_source.contributing_sources.append(self.__assemble_information_source(org, None, xml_event, cache_object))
     else:
-      information_source = self.__assemble_information_source(org, 'Initial Author', xml_event, cache_object)
+      information_source = self.__assemble_information_source(org, 'Initial Author', xml_event, cache_object, event)
     
     if transformer_group:
       # add the owner due to the transformations
-      information_source.contributing_sources.append(self.__assemble_information_source(transformer_group.name, 'Transformer/Translator', xml_event, cache_object))
+      information_source.contributing_sources.append(self.__assemble_information_source(transformer_group.name, 'Transformer/Translator', xml_event, cache_object, event))
 
 
     setattr(cache_object, 'information_source', information_source)
@@ -590,7 +586,7 @@ class MispConverter(BaseController):
     # Set package intent to "Threat Report"
     package_intent = PackageIntent()
     package_intent.intent = 'Threat Report'
-    self.set_base(xml_event, package_intent, cache_object)
+    self.set_base(xml_event, package_intent, cache_object, event)
     event.stix_header.package_intents.append(package_intent)
 
     event.properties.is_shareable = published == '1'
@@ -623,9 +619,9 @@ class MispConverter(BaseController):
     # generate generic indicators
     indicators = self.indicator_controller.get_generic_indicators(event, cache_object)
     for indicator in indicators:
-      self.set_base(xml_event, indicator, cache_object)
+      self.set_base(xml_event, indicator, cache_object, event)
       # indicator.information_source = self.get_information_source(xml_event, cache_object)
-      indicator.producer = self.get_information_source(xml_event, cache_object)
+      indicator.producer = self.get_information_source(xml_event, cache_object, event)
 
     event.indicators = indicators
 

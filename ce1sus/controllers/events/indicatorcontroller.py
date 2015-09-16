@@ -93,7 +93,7 @@ class IndicatorController(BaseController):
       # valid time positions
       # related_indicators
       # related campaigns
-      if indicator.sigthings:
+      if indicator.sightings:
         for sighting in indicator.sightings:
           self.remove_sighting(sighting, cache_object, commit)
       self.indicator_broker.remove_by_id(indicator.identifier, False)

@@ -12,7 +12,6 @@ from sqlalchemy.sql.sqltypes import Integer
 from ce1sus.common.utils import table_code
 from ce1sus.db.classes.internal.common import Properties
 from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeTextType
-from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.common.session import Base
 
 
@@ -471,6 +470,11 @@ _REL_SNORTRULE_PATH = Table('rel_snortrule_path', getattr(Base, 'metadata'),
                                     Column('path_id', BigIntegerType, ForeignKey('paths.path_id', onupdate='cascade', ondelete='cascade'), nullable=False, primary_key=True, index=True)
                                     )
 
+_REL_MEASURESOURCE_PATH = Table('rel_measuresource_path', getattr(Base, 'metadata'),
+                                    Column('measuresource_id', BigIntegerType, ForeignKey('measuresources.measuresource_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),
+                                    Column('path_id', BigIntegerType, ForeignKey('paths.path_id', onupdate='cascade', ondelete='cascade'), nullable=False, primary_key=True, index=True)
+                                    )
+
 class Path(BaseObject, Base):
 
   uuid = None
@@ -479,7 +483,7 @@ class Path(BaseObject, Base):
   item_tlp_level_id = Column('item_tlp_level_id', Integer, default=3, nullable=False, index=True)
   path = Column('path', UnicodeTextType, nullable=False)
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=True, index=True)
-  event = relationship(Event, uselist=False)
+  event = relationship('Event', uselist=False)
   dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   item_dbcode = Column('item_code', Integer, nullable=False, default=0, index=True)
   __item_bit_code = None
