@@ -28,4 +28,4 @@ class ChecksHandler(RestBaseHandler):
   @rest_method(default=True)
   @methods(allowed=['GET'])
   def isuseradmin(self, **args):
-    return self.check_if_admin()
+    return self.is_admin()
