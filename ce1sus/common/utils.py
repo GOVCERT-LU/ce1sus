@@ -71,3 +71,24 @@ def table_code(value):
   for c in value:
     result = result + ord(c)
   return baseencode(result)
+
+def get_attributes_object(object_):
+  result = list()
+  for attribute in object_.attributes:
+    result.append(attribute)
+  return result
+
+def get_attributes_observable(observable):
+  if observable.object:
+    return get_attributes_object(observable.object)
+  if observable.observable_composition:
+    result = list()
+    for obs in observable.observable_composition.observables:
+      result.extend(get_attributes_observable(obs))
+    return result
+
+def get_attriutes_indicator(indicator):
+  result = list()
+  for obs in indicator.observables:
+    result.extend(get_attributes_observable(obs))
+  return result

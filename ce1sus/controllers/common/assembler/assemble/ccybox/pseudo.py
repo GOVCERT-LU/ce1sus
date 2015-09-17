@@ -20,6 +20,7 @@ from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.errors.errorbase import ErrorObject, ErrorAttribute
 from ce1sus.db.classes.internal.object import Object, RelatedObject
 from ce1sus.db.common.broker import BrokerException
+from ce1sus.common.utils import get_attributes_object
 
 
 __author__ = 'Weber Jean-Paul'
@@ -202,6 +203,20 @@ class PseudoCyboxAssembler(BaseAssembler):
 
     return handler_instance
 
+  def __verify_observable(self, observable, cache_object):
+    if observable.object:
+      # the object itself can only be valid as it has to be defined to make the handler work
+      attributes = get_attributes_object(observable.object)
+      for attribute in attributes:
+        if not attribute.validate():
+          error_message = ObjectValidator.getFirstValidationError(attribute)
+          self.log_attribute_error(observable.object, attribute.to_dict(cache_object), error_message)
+          # remove attribute from object
+          observable.object.attributes.remove(attribute)
+    if observable.observable_composition:
+      for obs in observable.observable_composition.observables:
+        self.__verify_observable(obs, cache_object)
+
   def assemble_attribute(self, obj, json, cache_object):
     if json:
       int_cache_object = CacheObject()
@@ -217,6 +232,9 @@ class PseudoCyboxAssembler(BaseAssembler):
             if isinstance(returnvalue, Observable):
               # make the observable composed and append the observables
               changed_on = max(changed_on, 2)
+              # verify observable
+              self.__verify_observable(returnvalue, cache_object)
+              
               if not hasattr(returnvalue, 'dontchange'):
                 if observable.observable_composition:
                   # delink observable
@@ -248,6 +266,17 @@ class PseudoCyboxAssembler(BaseAssembler):
               changed_on = max(changed_on, 1)
               # append them to the object
               # TODO find out if they are not already present
+
+              # verify attributes
+              # the object itself can only be valid as it has to be defined to make the handler work
+              attributes = get_attributes_object(returnvalue.object)
+              for attribute in attributes:
+                if not attribute.validate():
+                  error_message = ObjectValidator.getFirstValidationError(attribute)
+                  self.log_attribute_error(returnvalue.object, attribute.to_dict(cache_object), error_message)
+                  # remove attribute from object
+                  returnvalue.object.attributes.remove(attribute)
+
               obj.related_objects.append(returnvalue)
             elif isinstance(returnvalue, Attribute):
               changed_on = max(changed_on, 0)
