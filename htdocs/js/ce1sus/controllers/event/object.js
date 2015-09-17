@@ -11,8 +11,7 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
     $scope.$hide();
   });
   
-  var original_observableObject = {'properties' : {'shared': false},
-                                   'definition_id': null};
+  var original_observableObject = {'attributes':[], 'properties' : {'shared': true}, 'definition_id': null};
   $scope.observableObject=angular.copy(original_observableObject);
   
   $scope.$watch(function() {

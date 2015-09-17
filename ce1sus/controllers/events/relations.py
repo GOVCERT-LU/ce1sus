@@ -6,13 +6,16 @@
 Created on Jan 2, 2015
 """
 
+import uuid
+
 from ce1sus.controllers.base import BaseController, ControllerException
+from ce1sus.controllers.common.permissions import PermissionController
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.relationbroker import RelationBroker
 from ce1sus.db.brokers.values import ValueBroker
 from ce1sus.db.classes.internal.backend.relation import Relation
 from ce1sus.db.common.broker import IntegrityException, BrokerException
-from ce1sus.controllers.common.permissions import PermissionController
+from ce1sus.controllers.events.search import SearchController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -29,6 +32,7 @@ class RelationController(BaseController):
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
     self.permission_controller = self.controller_factory(PermissionController)
+    self.search_controller = self.controller_factory(SearchController)
 
   def generate_attribute_relations(self, attribute, commit=False):
     try:
@@ -55,6 +59,7 @@ class RelationController(BaseController):
           if relation.event_id != event.identifier:
                         # make relation in both ways
             relation_entry = Relation()
+            relation_entry.uuid = '{0}'.format(uuid.uuid4())
             relation_entry.event_id = event.identifier
             relation_entry.rel_event_id = relation.event_id
             relation_entry.attribute_id = attribute.identifier
@@ -75,49 +80,59 @@ class RelationController(BaseController):
   def limited_generate_bulk_attributes(self, event, attributes, limit=1000, commit=False):
     # sport attributes by their definition
     partitions = dict()
-    classes = dict()
+    definitions = dict()
     values_attr = dict()
     for attribute in attributes:
 
-      value_table = attribute.definition.value_table
-      classname = '{0}Value'.format(value_table)
-
       if attribute.definition.relation:
-        classes[classname] = ValueBroker.get_class_by_string(value_table)
-        if not partitions.get(classname, None):
+        attr_def_name = attribute.definition.name
+        definitions[attr_def_name] = attribute.definition
+        if not partitions.get(attr_def_name, None):
             # create partition list
-          partitions[classname] = list()
+          partitions[attr_def_name] = list()
           # create item list
-          partitions[classname].append(list())
-        if len(partitions[classname][len(partitions[classname]) - 1]) > limit:
-          partitions[classname].append(list())
-        partitions[classname][len(partitions[classname]) - 1].append(attribute.value)
+          partitions[attr_def_name].append(list())
+        if len(partitions[attr_def_name][len(partitions[attr_def_name]) - 1]) > limit:
+          partitions[attr_def_name].append(list())
+        partitions[attr_def_name][len(partitions[attr_def_name]) - 1].append(attribute.value)
         values_attr[attribute.value] = attribute
 
     # search in partitions
-    for classname, partitions in partitions.iteritems():
+    for attr_def_name, partitions in partitions.iteritems():
       for search_items in partitions:
-        clazz = classes.get(classname)
-        self.find_relations_of_array(event, clazz, search_items, values_attr, commit)
+        definition = definitions.get(attr_def_name)
+        self.find_relations_of_array(event, definition, search_items, values_attr, commit)
     self.relation_broker.do_commit(commit)
 
-  def find_relations_of_array(self, event, clazz, search_items, values_attr, commit=False):
+  def search_items(self, definition, unique_search_items):
+    definitions = [definition]
+    if definition.value_type.name != 'None':
+      #get all definitions related to this
+      pass
+    
+    result = list()
+    for definition in definitions:
+      result.extend(self.search_controller.search(unique_search_items, 'in', definition.name, True))
+    return result
+
+  def find_relations_of_array(self, event, definition, search_items, values_attr, commit=False):
     # collect relations
     unique_search_items = list(set(search_items))
-    found_items = self.attribute_broker.get_attriutes_by_class_and_values(clazz, unique_search_items)
+    found_items = self.search_items(definition, unique_search_items)
     for found_item in found_items:
       # make insert foo
-      if found_item.event_id != event.identifier:
+      if found_item.path.event_id != event.identifier:
         # make relation in both ways
         relation_entry = Relation()
+        relation_entry.uuid = '{0}'.format(uuid.uuid4())
         relation_entry.event = event
-        relation_entry.rel_event_id = found_item.event_id
-        attribute = values_attr.get(found_item.attribute.value, None)
+        relation_entry.rel_event_id = found_item.path.event_id
+        attribute = values_attr.get(found_item.value, None)
         if attribute:
           relation_entry.attribute = attribute
         else:
           continue
-        relation_entry.rel_attribute_id = found_item.attribute_id
+        relation_entry.rel_attribute_id = found_item.identifier
         try:
           self.relation_broker.insert(relation_entry, False)
         except IntegrityException:
@@ -142,28 +157,6 @@ class RelationController(BaseController):
       return self.relation_broker.remove_relations_for_event(event)
     except BrokerException as error:
       raise ControllerException(error)
-
-  def make_object_attributes_flat(self, obj, cache_object):
-    result = list()
-    if obj:
-      for attribute in obj.attributes:
-        if self.permission_controller.is_instance_viewable(attribute, cache_object):
-          result.append(attribute)
-      for related_object in obj.related_objects:
-        if self.permission_controller.is_instance_viewable(related_object, cache_object):
-          result.extend(self.make_object_attributes_flat(related_object.object, cache_object))
-    return result
-
-  def __process_observable(self, observable, cache_object):
-    result = list()
-    if observable.observable_composition and self.permission_controller.is_instance_viewable(observable.observable_composition, cache_object):
-      for child_observable in observable.observable_composition.observables:
-        if self.permission_controller.is_instance_viewable(child_observable, cache_object):
-          result.extend(self.__process_observable(child_observable, cache_object))
-    else:
-      if self.permission_controller.is_instance_viewable(observable.object, cache_object):
-        result.extend(self.make_object_attributes_flat(observable.object, cache_object))
-    return result
 
   def remove_all_relations_by_definition_ids(self, id_list, commit=True):
     try:

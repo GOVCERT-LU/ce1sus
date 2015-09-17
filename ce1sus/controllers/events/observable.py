@@ -9,8 +9,11 @@ Created: Aug 28, 2013
 from datetime import datetime
 from uuid import uuid4
 
+from ce1sus.common.utils import get_attributes_observable, get_attributes_object
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.common.common import CommonController
+from ce1sus.controllers.common.path import PathController
+from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.event.composedobservablebroker import ComposedObservableBroker
 from ce1sus.db.brokers.event.objectbroker import ObjectBroker
@@ -19,7 +22,6 @@ from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.common.broker import ValidationException, BrokerException, NothingFoundException
-from ce1sus.controllers.common.path import PathController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -40,8 +42,9 @@ class ObservableController(BaseController):
     self.related_object_broker = self.broker_factory(RelatedObjectBroker)
     self.common_controller = self.controller_factory(CommonController)
     self.path_controller = self.controller_factory(PathController)
+    self.relations_controller = self.controller_factory(RelationController)
 
-  def insert_observable(self, observable, cache_object, commit=True):
+  def insert_observable(self, observable, cache_object, commit=True, mkrelations=True):
     """
     inserts an event
 
@@ -54,6 +57,11 @@ class ObservableController(BaseController):
     """
     try:
       self.insert_set_base(observable, cache_object)
+
+      flat_attribtues = get_attributes_observable(observable)
+      if (mkrelations == 'True' or mkrelations is True) and flat_attribtues:
+        self.relations_controller.generate_bulk_attributes_relations(observable.path.event, flat_attribtues, False)
+
       self.observable_broker.insert(observable, False)
       # TODO: generate relations if needed!
 
@@ -256,9 +264,14 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_object(self, obj, cache_object, commit=True):
+  def insert_object(self, obj, cache_object, commit=True, mkrelations=True):
     try:
       self.insert_set_base(obj, cache_object)
+
+      flat_attribtues = get_attributes_object(obj)
+      if (mkrelations == 'True' or mkrelations is True) and flat_attribtues:
+        self.relations_controller.generate_bulk_attributes_relations(obj.path.event, flat_attribtues, False)
+
       self.object_broker.insert(obj, False)
       self.object_broker.do_commit(commit)
     except BrokerException as error:

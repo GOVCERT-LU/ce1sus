@@ -104,7 +104,8 @@ class PseudoCyboxAssembler(BaseAssembler):
         attributes = json.get('attributes')
         if attributes:
           for attribute in attributes:
-            self.assemble_attribute(obj, attribute, cache_object)
+
+              self.assemble_attribute(obj, attribute, cache_object)
         return obj
 
   def assemble_related_object(self, obj, json, cache_object):

@@ -28,13 +28,6 @@ class AttributeBroker(BrokerBase):
     """
     return Attribute
 
-  def get_attriutes_by_class_and_values(self, clazz, search_items):
-    try:
-      return self.session.query(clazz).filter(clazz.value.in_(search_items)).all()
-    except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
-      raise BrokerException(error)
-
   def get_all_by_uuids(self, uuids):
     try:
       return self.session.query(Attribute).filter(Attribute.uuid.in_(uuids)).all()

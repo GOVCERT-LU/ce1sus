@@ -79,11 +79,17 @@ def get_attributes_object(object_):
   return result
 
 def get_attributes_observable(observable):
-  if observable.object:
-    return get_attributes_object(observable.object)
-  if observable.observable_composition:
+  if observable.get_classname() == 'Observable':
+    if observable.object:
+      return get_attributes_object(observable.object)
+    if observable.observable_composition:
+      result = list()
+      for obs in observable.observable_composition.observables:
+        result.extend(get_attributes_observable(obs))
+      return result
+  else:
     result = list()
-    for obs in observable.observable_composition.observables:
+    for obs in observable.observables:
       result.extend(get_attributes_observable(obs))
     return result
 
@@ -91,4 +97,12 @@ def get_attriutes_indicator(indicator):
   result = list()
   for obs in indicator.observables:
     result.extend(get_attributes_observable(obs))
+  return result
+
+def get_attributes_event(event):
+  result = list()
+  for obs in event.observables:
+    result.extend(get_attributes_observable(obs))
+  for ind in event.indicators:
+    result.extend(get_attriutes_indicator(ind))
   return result

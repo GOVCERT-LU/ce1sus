@@ -7,6 +7,7 @@ Created: Aug 28, 2013
 """
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
+from ce1sus.common.utils import get_attributes_event
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
 from ce1sus.controllers.common.common import CommonController
 from ce1sus.controllers.common.path import PathController
@@ -85,7 +86,7 @@ class EventController(BaseController):
       # the the creator
       # generate relations if needed!
 
-      flat_attribtues = self.path_controller.get_flat_attributes(event, cache_object, False)
+      flat_attribtues = get_attributes_event(event)
       if (mkrelations == 'True' or mkrelations is True) and flat_attribtues:
         self.relations_controller.generate_bulk_attributes_relations(event, flat_attribtues, False)
 

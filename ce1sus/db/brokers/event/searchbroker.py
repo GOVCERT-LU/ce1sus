@@ -59,8 +59,13 @@ class SearchBroker(BrokerBase):
           conditions.append(getattr(clazz, attribute_name) >= needle)
         elif operator == 'like':
           conditions.append(getattr(clazz, attribute_name).like('%{0}%'.format(needle)))
+        elif operator == 'in':
+          if isinstance(needle, list):
+            conditions.append(getattr(clazz, attribute_name).in_(needle))
+          else:
+            raise BrokerException('needle is not a list')
         else:
-          raise Exception('Operator not defined')
+          raise BrokerException('Operator not defined')
 
     if conditions:
         return query.filter(
@@ -73,10 +78,10 @@ class SearchBroker(BrokerBase):
     result = list()
     for found_value in found_values:
       if bypass_validation:
-        if found_value.path.properties.is_validated:
-          result.append(found_value)
-      else:
         result.append(found_value)
+      else:
+        if found_value.properties.is_validated:
+          result.append(found_value)
     return result
 
   def look_for_value_by_properties(self, clazz, property_names, needle, operator, bypass_validation=False):

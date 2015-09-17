@@ -7,6 +7,7 @@ Created: Aug 28, 2013
 """
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.common.common import CommonController
+from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 
@@ -24,6 +25,7 @@ class AttributeController(BaseController):
     super(AttributeController, self).__init__(config, session)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.common_controller = self.controller_factory(CommonController)
+    self.relations_controller = self.controller_factory(RelationController)
 
   def get_attribute_by_id(self, identifier):
     try:
@@ -59,13 +61,22 @@ class AttributeController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_attributes(self, attributes, cache_object, commit=True):
+  def insert_attributes(self, attributes, cache_object, commit=True, mkrelations=True):
     # handle handler attributes
     try:
       # update parent
       if len(attributes) > 0:
         attribute = attributes[0]
         self.insert_set_base(attribute, cache_object)
+      else:
+        raise ControllerException('No attributes given to insert')
+
+
+      self.relations_controller = self.controller_factory(RelationController)
+
+      if (mkrelations == 'True' or mkrelations is True) and attributes:
+        self.relations_controller.generate_bulk_attributes_relations(attributes[0].path.event, attributes, False)
+
 
       # set owner
       for attribute in attributes:

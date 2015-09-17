@@ -101,7 +101,11 @@ class RestBaseHandler(BaseView):
 
   def get_cache_object(self, args):
     headers = args.get('headers')
-    cache_object = CacheObject(user=self.get_user(),
+    user = self.get_user()
+    if user:
+      self.user_controller.get_user_by_id(user.identifier)
+
+    cache_object = CacheObject(user=user,
                                rest_insert=self.is_rest_insert(headers),
                                details=self.get_detail_value(args),
                                inflated=self.get_inflated_value(args),

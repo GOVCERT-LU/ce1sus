@@ -38,3 +38,5 @@ gpg/
 /reindent.py
 /test.py
 /test2.py
+/mispdump/
+/stixdump/
