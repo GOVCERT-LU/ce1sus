@@ -145,6 +145,16 @@ class BrokerBase(object):
 
     return result
 
+  def remove(self, instance, commit=True):
+    try:
+      self.session.delete(instance)
+    except sqlalchemy.exc.IntegrityError as error:
+      self.session.rollback()
+      raise IntegrityException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
   def remove_by_id(self, identifier, commit=True):
     """
     Removes the <<get_broker_class()>> with the given identifier

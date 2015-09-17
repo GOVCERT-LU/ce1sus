@@ -5,7 +5,7 @@
 
 Created on Jul 3, 2015
 """
-from sqlalchemy.orm import relationship, joinedload, lazyload
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 

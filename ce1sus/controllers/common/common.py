@@ -50,7 +50,7 @@ class CommonController(BaseController):
       for related_identity in identity.related_identities:
         self.remove_realated_identity(related_identity, cache_object, False)
 
-      self.identity_broker.remove_by_id(identity.identifier, False)
+      self.identity_broker.remove(identity, False)
       self.identity_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
@@ -128,8 +128,10 @@ class CommonController(BaseController):
       self.remove_path(information_source.path, cache_object, False)
       if information_source.description:
         self.remove_structured_text(information_source.description, cache_object, False)
+
       if information_source.identity:
         self.remove_identity(information_source.identity, cache_object, False)
+
       for contributing_source in information_source.contributing_sources:
         self.remove_information_source(contributing_source, cache_object, False)
 
@@ -141,8 +143,8 @@ class CommonController(BaseController):
       if information_source.confidence:
         self.remove_confidence(information_source.confidence, cache_object, False)
 
-      self.structured_text_broker.remove_by_id(information_source.identifier, False)
-      self.structured_text_broker.do_commit(commit)
+      self.information_source_broker.remove_by_id(information_source.identifier, False)
+      self.information_source_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
 
