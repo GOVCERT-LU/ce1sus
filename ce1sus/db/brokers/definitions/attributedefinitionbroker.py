@@ -11,6 +11,7 @@ from ce1sus.db.brokers.definitions.definitionbase import DefinitionBrokerBase
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.classes.internal.definitions import AttributeDefinition, ObjectDefinition
 from ce1sus.db.common.broker import NothingFoundException, BrokerException, IntegrityException
+from ce1sus.db.classes.internal.backend.types import AttributeType
 
 
 __author__ = 'Weber Jean-Paul'
@@ -151,6 +152,20 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
   def get_all_relationable_definitions(self):
     try:
       definitions = self.session.query(AttributeDefinition).filter(AttributeDefinition.relation == 1).all()
+      if definitions:
+        return definitions
+      else:
+        raise sqlalchemy.orm.exc.NoResultFound
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'No {0} is set as relationable'.format(self.get_broker_class().__class__.__name__))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
+
+  def get_all_attribute_definitions_by_type(self, attribute_type):
+    try:
+      definitions = self.session.query(AttributeDefinition).join(AttributeDefinition.value_type).filter(AttributeType.identifier == attribute_type.identifier).all()
       if definitions:
         return definitions
       else:

@@ -9,7 +9,7 @@ Created on Oct 16, 2014
 from ce1sus.helpers.common.objects import get_class
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator, FailedValidation
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Table, Column, ForeignKey
+from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, Boolean
 
 from ce1sus.common import merge_dictionaries
@@ -20,20 +20,13 @@ from ce1sus.db.classes.internal.core import SimpleLoggingInformations
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType, BaseObject
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
+from ce1sus.db.classes.internal.relations import _REL_OBJECT_ATTRIBUTE_DEFINITION
 
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-
-_REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
-    'objectdefinition_has_attributedefinitions', getattr(Base, 'metadata'),
-    Column('oha_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-    Column('attributedefinition_id', BigIntegerType, ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True),
-    Column('objectdefinition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-)
 
 
 class DefinitionException(Exception):
@@ -53,7 +46,7 @@ class ObjectDefinition(SimpleLoggingInformations, Base):
 
   # the relationship is flagged with true when it is a required attribute
   attributes = relationship('AttributeDefinition',
-                            secondary='objectdefinition_has_attributedefinitions',
+                            secondary=_REL_OBJECT_ATTRIBUTE_DEFINITION,
                             order_by='AttributeDefinition.name')
   cybox_std = Column('cybox_std', Boolean, default=False)
 
@@ -185,6 +178,11 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
 
   def to_dict(self, cache_object):
     instance = self.get_instance([], cache_object)
+    value_type_uuid = None
+    value_type_name = None
+    if instance.value_type:
+      value_type_uuid = instance.value_type.uuid
+      value_type_name = instance.value_type.name
     if cache_object.complete:
       result = {
               'name': instance.convert_value(instance.name),
@@ -195,8 +193,8 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
               'relation': instance.convert_value(instance.relation),
               'share': instance.convert_value(instance.share),
               'regex': instance.convert_value(instance.regex),
-              'type_id': instance.convert_value(instance.value_type.uuid),
-              'type': instance.convert_value(instance.value_type.name),
+              'type_id': instance.convert_value(value_type_uuid),
+              'type': instance.convert_value(value_type_name),
               'default_condition_id': instance.convert_value(instance.default_condition.uuid),
               'chksum': instance.convert_value(instance.chksum),
               'cybox_std': instance.convert_value(instance.cybox_std)

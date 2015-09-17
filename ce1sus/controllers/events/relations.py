@@ -105,10 +105,12 @@ class RelationController(BaseController):
     self.relation_broker.do_commit(commit)
 
   def search_items(self, definition, unique_search_items):
-    definitions = [definition]
-    if definition.value_type.name != 'None':
+
+    if definition.value_type and definition.value_type.name != 'None':
       #get all definitions related to this
-      pass
+      definitions = self.attr_def_broker.get_all_attribute_definitions_by_type(definition.value_type)
+    else:
+      definitions = [definition]
     
     result = list()
     for definition in definitions:

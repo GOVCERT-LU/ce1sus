@@ -69,3 +69,10 @@ _REL_REPORT_STRUCTUREDTEXT_SHORT = Table('rel_report_structuredtext_short', geta
                                               nullable=False,
                                               primary_key=True, index=True)
                                        )
+
+_REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
+    'objectdefinition_has_attributedefinitions', getattr(Base, 'metadata'),
+    Column('oha_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+    Column('attributedefinition_id', BigIntegerType, ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True),
+    Column('objectdefinition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+)
