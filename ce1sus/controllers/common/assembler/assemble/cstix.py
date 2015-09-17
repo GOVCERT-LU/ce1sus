@@ -76,7 +76,7 @@ class StixAssembler(BaseAssembler):
       confidence = json.get('confidence', None)
       if confidence:
         # TODO: assemble
-        indicator.confidence = self.assemble_confidence()
+        indicator.confidence = self.assemble_confidence(indicator, confidence, cache_object)
       indicator.id_ = json.get('id_', None)
       indicator.idref = json.get('idref', None)
       if not indicator.idref:

@@ -61,7 +61,11 @@
       <i class="fa fa-users fa-3x"></i>
     </a>
   </li>
-    
+  <li ng-class="{active: $routeSegment.contains('errors')}">
+    <a href="#/events/event/{{event.identifier}}/errors">
+      <i class="fa fa-exclamation-triangle fa-3x"></i>
+    </a>
+  </li>
   <li style="float: right;">
     <a class="hand" ng-click="reloadPage()">
       <i class="fa fa-refresh fa-3x"></i>

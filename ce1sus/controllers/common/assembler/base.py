@@ -9,6 +9,7 @@ from ce1sus.helpers.common import strings
 
 from ce1sus.controllers.common.basechanger import BaseChangerException, BaseChanger
 from ce1sus.db.classes.ccybox.common.time import CyboxTime
+from ce1sus.db.classes.cstix.common.confidence import Confidence
 from ce1sus.db.classes.cstix.common.datetimewithprecision import DateTimeWithPrecision
 from ce1sus.db.classes.cstix.common.identity import Identity
 from ce1sus.db.classes.cstix.common.information_source import InformationSource, InformationSourceRole
@@ -28,6 +29,25 @@ class AssemblerException(BaseChangerException):
 
 
 class BaseAssembler(BaseChanger):
+
+  def assemble_confidence(self, parent, json, cache_object):
+    instance = Confidence()
+    instance.parent = parent
+    self.set_base(instance, json, cache_object, parent)
+    if json:
+      instance.timestamp_precision = json.get('timestamp_precision', None)
+      instance.timestamp = json.get('timestamp', None)
+      value = json.get('timestamp', None)
+      if value:
+        instance.value = value
+
+      description = json.get('description', None)
+      if description:
+        instance.description = self.assemble_structured_text(instance, description, cache_object)
+      source = json.get('source', None)
+      if source:
+        instance.source = self.assemble_information_source(instance, source, cache_object)
+      return instance
 
   def assemble_structured_text(self, parent, json, cache_object):
     instance = StructuredText()

@@ -168,13 +168,11 @@ class EventBroker(BrokerBase):
       group_ids = self.__get_all_group_ids_of_user(user)
       tlp = get_max_tlp(user.group)
 
-    query = self.session.query(Event.identifier).join(Event.path, Event.groups)
+    query = self.session.query(Event.identifier).join(Event.path).outerjoin(Event.groups)
     if unvalidated_only:
       query = query.filter(Path.dbcode.op('&')(4) != 4)
     else:
-      query = query.filter(or_(and_(Event.creator_group_id == user.group.identifier,
-                                    Event.groups == None
-                                    ),
+      query = query.filter(or_(Event.creator_group_id == user.group.identifier,
                                and_(Path.dbcode.op('&')(12) == 12,
                                     or_(Path.tlp_level_id >= tlp,
                                         EventGroupPermission.group_id.in_(group_ids),

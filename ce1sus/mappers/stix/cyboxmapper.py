@@ -28,7 +28,8 @@ NOT_MAPPED = [
               'File_HashList_sha1',
               'File_HashList_sha256',
               'File_HashList_sha384',
-              'File_HashList_sha512'
+              'File_HashList_sha512',
+              'File_Hash_HashName_xsi_type',
               ]
 
 #Don't know how to map these yet

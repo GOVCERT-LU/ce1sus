@@ -30,7 +30,7 @@ class EventsController(BaseController):
   def get_events(self, offset, limit, user, parameters=None):
     try:
       if offset:
-        int_off = int(offset) + 1
+        int_off = int(offset) - 1
       if limit:
         int_lim = int(limit)
 
