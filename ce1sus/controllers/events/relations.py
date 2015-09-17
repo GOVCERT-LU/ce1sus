@@ -165,26 +165,6 @@ class RelationController(BaseController):
         result.extend(self.make_object_attributes_flat(observable.object, cache_object))
     return result
 
-  def get_flat_attributes_for_event(self, event, cache_object):
-    # Make attributes flat
-    flat_attriutes = list()
-
-    if event.observables:
-      for observable in event.observables:
-        if observable.observable_composition and self.permission_controller.is_instance_viewable(observable.observable_composition, cache_object):
-          for obs in observable.observable_composition.observables:
-            if self.permission_controller.is_instance_viewable(observable.observable_composition, cache_object):
-              flat_attriutes.extend(self.__process_observable(obs, cache_object))
-        else:
-          flat_attriutes.extend(self.__process_observable(observable, cache_object))
-    if event.indicators:
-      for indicator in event.indicators:
-        if indicator.observables and self.permission_controller.is_instance_viewable(indicator, cache_object):
-          for observable in indicator.observables:
-            if self.permission_controller.is_instance_viewable(observable, cache_object):
-              flat_attriutes.extend(self.__process_observable(observable, cache_object))
-    return flat_attriutes
-
   def remove_all_relations_by_definition_ids(self, id_list, commit=True):
     try:
       relations = self.relation_broker.get_all_rel_with_not_def_list(id_list)

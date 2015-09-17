@@ -5,7 +5,7 @@
 
 Created on Dec 22, 2014
 """
-from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
+from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException, NotImplementedException
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.internal.object import Object
@@ -115,12 +115,7 @@ class ObservableHandler(RestBaseHandler):
 
       if method == 'GET':
         if cache_object.flat:
-          result = list()
-          flat_objects = self.observable_controller.get_flat_observable_objects(observable, cache_object)
-
-          for flat_object in flat_objects:
-            result.append(flat_object.to_dict(cache_object))
-          return result
+          raise NotImplementedException('Flat objects are not suported')
         else:
           if self.is_instance_viewable(observable.object, cache_object):
             return observable.object.to_dict(cache_object)

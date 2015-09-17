@@ -9,16 +9,18 @@ from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
 from ce1sus.controllers.common.common import CommonController
+from ce1sus.controllers.common.path import PathController
+from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
+from ce1sus.controllers.events.reports import ReportController
 from ce1sus.db.brokers.common.common import STIXHeaderBroker
+from ce1sus.db.brokers.common.path import PathBroker
 from ce1sus.db.brokers.event.comments import CommentBroker
 from ce1sus.db.brokers.event.eventbroker import EventBroker, EventPermissionBroker
 from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
-from ce1sus.controllers.events.indicatorcontroller import IndicatorController
-from ce1sus.controllers.events.reports import ReportController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -42,6 +44,8 @@ class EventController(BaseController):
     self.stix_header_broker = self.broker_factory(STIXHeaderBroker)
     self.indicator_controller = self.controller_factory(IndicatorController)
     self.report_controller = self.controller_factory(ReportController)
+    self.path_broker = self.broker_factory(PathBroker)
+    self.path_controller = self.controller_factory(PathController)
   
   def get_event_permission_by_uuid(self, uuid):
     try:
@@ -81,7 +85,7 @@ class EventController(BaseController):
       # the the creator
       # generate relations if needed!
 
-      flat_attribtues = self.relations_controller.get_flat_attributes_for_event(event, cache_object)
+      flat_attribtues = self.path_controller.get_flat_attributes(event, cache_object, False)
       if (mkrelations == 'True' or mkrelations is True) and flat_attribtues:
         self.relations_controller.generate_bulk_attributes_relations(event, flat_attribtues, False)
 
@@ -327,43 +331,14 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def __validate_object(self, obj, user):
-    self.__validate_instance(obj, user)
-    for related_object in obj.related_objects:
-      self.__validate_object(related_object.object, user)
-    for attribute in obj.attributes:
-      self.__validate_instance(attribute, user)
-
-  def __validate_observable(self, observable, user):
-    self.__validate_instance(observable, user)
-    if observable.observable_composition:
-      observable.observable_composition.properties.is_validated = True
-      for child in observable.observable_composition.observables:
-        self.__validate_observable(child, user)
-    if observable.object:
-      self.__validate_object(observable.object, user)
-
-  def __validate_instance(self, instance, user):
-    instance.properties.is_validated = True
-    self.set_extended_logging(instance, user, False)
-
-  def validate_event(self, event, cache_object):
+  def validate_event(self, event, cache_object, commit=True):
     try:
-      user = self.user_broker.get_by_id(cache_object.user.identifier)
-      self.__validate_instance(event, user)
-      for observable in event.observables:
-        self.__validate_observable(observable, user)
-      # Validate reports
-      for report in event.reports:
-        self.__validate_instance(report, user)
-        for reference in report.references:
-          self.__validate_instance(reference, user)
-      # validate indicators
-      for indicator in event.indicators:
-        self.__validate_instance(indicator, user)
-        for observable in indicator.observables:
-          self.__validate_observable(observable, user)
-      self.event_broker.update(event, True)
+      elements = self.path_broker.get_all_elements(event)
+      for element in elements:
+        element.merged_properties.is_validated = True
+        element.item_properties.is_validated = True
+      self.path_broker.do_commit(commit)
+
     except BrokerException as error:
       raise ControllerException(error)
 

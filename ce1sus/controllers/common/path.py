@@ -7,9 +7,13 @@ Created on 3 Sep 2015
 """
 
 from ce1sus.common.utils import instance_code
-from ce1sus.controllers.base import BaseController
+from ce1sus.controllers.base import BaseController, ControllerException
+from ce1sus.controllers.common.permissions import PermissionController
+from ce1sus.db.brokers.common.path import PathBroker
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.path import Path
+from ce1sus.db.common.broker import BrokerException
+from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -22,6 +26,9 @@ class PathController(BaseController):
 
   def __init__(self, config, session=None):
     super(PathController, self).__init__(config, session)
+    self.permission_controller = self.controller_factory(PermissionController)
+    self.path_broker = self.broker_factory(PathBroker)
+    self.attribute_broker = self.broker_factory(AttributeBroker)
 
 
 
@@ -84,3 +91,24 @@ class PathController(BaseController):
           path_instance.event = parent.path.root
 
     return path_instance
+  
+  def get_flat_attributes(self, event, cache_object, check_permissions=True):
+    try:
+      attributes_paths = self.path_broker.get_all_attribute_paths(event)
+      attribute_uuids = list()
+      for attributes_path in attributes_paths:
+        uuid = attributes_path.path.rsplit('/', 1)[1]
+        uuid = uuid.split('-', 1)[1]
+        attribute_uuids.append(uuid)
+      attributes = self.attribute_broker.get_all_by_uuids(attribute_uuids)
+      if check_permissions:
+        result = list()
+        for attribtue in attributes:
+          if self.permission_controller.is_instance_viewable(attribtue, cache_object):
+            result.append(attribtue)
+        return result
+      else:
+        return attributes
+    except BrokerException as error:
+      raise ControllerException(error)
+    

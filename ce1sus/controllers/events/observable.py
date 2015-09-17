@@ -333,29 +333,6 @@ class ObservableController(BaseController):
       self.object_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
-    
-  def get_flat_object(self, obj, cache_object):
-    result = list()
-    result.append(obj)
-    for rel_obj in obj.related_objects:
-      if is_object_viewable(rel_obj, cache_object):
-        rel_res = self.get_flat_object(rel_obj, cache_object)
-        if rel_res:
-          result = result + rel_res
-    return result
-
-  def get_flat_observable_objects(self, observable, cache_object):
-    result = list()
-    if observable.object and is_object_viewable(observable.object, cache_object):
-      res = self.get_flat_object(observable.object, cache_object)
-      if res:
-        result = result + res
-    elif observable.observable_composition and is_object_viewable(observable.object, cache_object):
-      for obs in observable.observable_composition.observables:
-        res = self.get_flat_observable_objects(obs, cache_object)
-        if res:
-          result = result + res
-    return result
 
   def get_related_object_by_child(self, obj):
     try:

@@ -11,6 +11,7 @@ from uuid import uuid4
 from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.common.common import CommonController
+from ce1sus.controllers.common.path import PathController
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
@@ -44,6 +45,7 @@ class IndicatorController(BaseController):
     self.observable_controller = self.controller_factory(ObservableController)
     self.common_controller = self.controller_factory(CommonController)
     self.sigthing_broker = self.broker_factory(SightingBroker)
+    self.path_controller = self.controller_factory(PathController)
 
   def get_all(self):
     try:
@@ -206,7 +208,7 @@ class IndicatorController(BaseController):
     try:
       indicators = list()
       
-      flat_attribtues = self.relation_controller.get_flat_attributes_for_event(event, cache_object)
+      flat_attribtues = self.self.path_controller.get_flat_attributes(event, cache_object, True)
       
       mal_email = list()
       ips = list()

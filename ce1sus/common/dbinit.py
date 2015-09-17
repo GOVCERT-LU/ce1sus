@@ -27,6 +27,7 @@ from ce1sus.db.classes.cstix.extensions.marking.simple_markings import SimpleMar
 from ce1sus.db.classes.cstix.extensions.test_mechanism.generic_test_mechanism import GenericTestMechanism
 from ce1sus.db.classes.cstix.extensions.test_mechanism.snort_test_mechanism import SnortTestMechanism, SnortRule
 from ce1sus.db.classes.cstix.extensions.test_mechanism.yara_test_mechanism import YaraTestMechanism
+from ce1sus.db.classes.internal.backend.processitem import ProcessItem
 from ce1sus.db.classes.internal.attributes.attribute import Condition
 from ce1sus.db.classes.internal.backend.config import Ce1susConfig
 from ce1sus.db.classes.internal.backend.mailtemplate import MailTemplate

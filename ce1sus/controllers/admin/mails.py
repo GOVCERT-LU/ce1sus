@@ -5,18 +5,20 @@
 
 Created on Feb 23, 2014
 """
+from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 import re
 
 from ce1sus.common.utils import get_max_tlp
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.common.path import PathController
+from ce1sus.controllers.common.permissions import PermissionController
 from ce1sus.controllers.events.relations import RelationController
+from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.brokers.mailtemplate import MailTemplateBroker
 from ce1sus.db.common.broker import BrokerException, ValidationException, NothingFoundException
 from ce1sus.helpers.common.mailer import Mail, MailerException
-from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
-from ce1sus.db.brokers.event.eventbroker import EventBroker
-from ce1sus.controllers.common.permissions import PermissionController
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -37,6 +39,7 @@ class MailController(BaseController):
     if is_plugin_available('mail', self.config):
       self.mail_handler = get_plugin_function('mail', 'get_instance', self.config, 'internal_plugin')()
     self.permission_controller = self.controller_factory(PermissionController)
+    self.path_controller = self.controller_factory(PathController)
 
   def get_all(self):
     try:
@@ -136,7 +139,7 @@ class MailController(BaseController):
 
   def __get_attributes(self, event, user, group, update, proposal=False):
     try:
-      flat_attributes = self.relation_controller.get_flat_attributes_for_event(event)
+      flat_attributes = self.path_controller.get_flat_attributes(event, None, False)
       # return only visible attribtues
       event_permissions = None
       if user:

@@ -6,6 +6,8 @@
 Created on Nov 8, 2014
 """
 
+from datetime import datetime
+
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.common.processbroker import ProcessBroker
@@ -31,6 +33,14 @@ class ProcessController(BaseController):
       return self.process_broker.get_all()
     except BrokerException as error:
       raise ControllerException(error)
+
+  def set_simple_logging(self, process_item, user, insert):
+    if insert:
+      process_item.created_at = datetime.utcnow()
+      process_item.creator = user
+    process_item.modified_on = datetime.utcnow()
+    process_item.modifier = user
+
 
   def create_new_process(self, type_, event_uuid, user, sync_server=None, commit=False):
     try:
