@@ -163,9 +163,9 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       raise BrokerException(error)
 
 
-  def get_all_attribute_definitions_by_type(self, attribute_type):
+  def get_all_attribute_definitions_by_type(self, attribute_type_id):
     try:
-      definitions = self.session.query(AttributeDefinition).join(AttributeDefinition.value_type).filter(AttributeType.identifier == attribute_type.identifier).all()
+      definitions = self.session.query(AttributeDefinition).filter(AttributeDefinition.value_type_id == attribute_type_id).all()
       if definitions:
         return definitions
       else:

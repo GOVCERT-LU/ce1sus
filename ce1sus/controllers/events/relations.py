@@ -108,7 +108,7 @@ class RelationController(BaseController):
 
     if definition.value_type and definition.value_type.name != 'None':
       #get all definitions related to this
-      definitions = self.attr_def_broker.get_all_attribute_definitions_by_type(definition.value_type)
+      definitions = self.attr_def_broker.get_all_attribute_definitions_by_type(definition.value_type_id)
     else:
       definitions = [definition]
     
