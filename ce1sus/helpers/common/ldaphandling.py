@@ -26,6 +26,7 @@ class LDAPUser(object):
     self.name = None
     self.dn_string = None
 
+
   @property
   def display_name(self):
     return u'{0} {1}'.format(self.sir_name, self.name)
@@ -73,6 +74,7 @@ class LDAPHandler(object):
     self.__users_dn = self.__config_section.get('users_dn')
     self.__tls = self.__config_section.get('usetls')
     self.logger = Log(config)
+    self.__filter = self.__config_section.get('filter')
 
   def _get_logger(self):
     """
@@ -175,7 +177,10 @@ class LDAPHandler(object):
 
     :returns: String
     """
-    filter_ = '(uid=*)'
+    if self.__filter:
+      filter_ = self.__filter
+    else:
+      filter_ = '(uid=*)'
     attributes = None
     user_list = None
     try:
