@@ -53,6 +53,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/events/event/:id/relations", "main.layout.events.event.relations")
         .when("/events/event/:id/reports", "main.layout.events.event.reports")
         .when("/events/event/:id/groups", "main.layout.events.event.groups")
+        .when("/events/event/:id/errors", "main.layout.events.event.errors")
         .when("/admin", "main.layout.admin")
         .when("/admin/validation", "main.layout.admin.validation")
         .when("/admin/validation/all", "main.layout.admin.validation.all")
@@ -417,6 +418,30 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                               },
                               eventpermissions: function(Restangular,$routeSegment) {
                                 return Restangular.one("event",$routeSegment.$routeParams.id).all("group").getList({"complete": true, "inflated":true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
+                            
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          
+                          .segment("errors", {
+                            templateUrl: "pages/events/event/errors.html",
+                            dependencies: ["id"],
+                            controller: 'eventErrorController',
+                            resolve: {
+                              errors: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all("errors").getList({"complete": true, "inflated":true}).then(function (data) {
                                   return data;
                                 }, function(response) {
                                     throw generateErrorMessage(response);

@@ -1097,3 +1097,26 @@ app.controller("uploadController", function($scope, $timeout, $log, Restangular,
   };
   
 });
+
+app.controller("eventErrorController", function($scope, Restangular, messages,
+    $log, $routeSegment, $location,errors, $anchorScroll, ngTableParams, $filter) {
+  
+  $scope.errors = errors;
+  
+  $scope.errorsTable = new ngTableParams({
+    page: 1,            // show first page
+    count: 10,           // count per page
+  }, {
+      total: $scope.errors.length, // length of data
+      getData: function($defer, params) {
+        var orderedData = params.filter() ? $filter('filter')($scope.errors, params.filter()) : $scope.errors;
+        orderedData = params.sorting() ? $filter('orderBy')(orderedData, params.orderBy()) : orderedData;
+        orderedData = orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count());
+        $defer.resolve(orderedData);
+      }
+  }); 
+  
+  $scope.getJSON = function(text) {
+    return JSON.parse(text);
+  };
+});
