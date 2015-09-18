@@ -94,43 +94,48 @@ class FileReferenceHandler(GenericHandler):
 
   def assemble(self, report, json):
     value = json.get('value', None)
-    filename = value.get('filename', None)
-    data = value.get('data', None)
-    if isinstance(data, types.DictionaryType):
-      # Workaround for the webfront end
-      data = data.get('data', None)
 
-    if filename and data:
-      # save file to tmp folder
-      tmp_filename = hashMD5(datetime.utcnow())
-      binary_data = base64.b64decode(data)
-      tmp_folder = self.get_tmp_folder()
-      tmp_path = tmp_folder + '/' + tmp_filename
+    if isinstance(value, dict):
+      filename = value.get('filename', None)
+      data = value.get('data', None)
+      if isinstance(data, types.DictionaryType):
+        # Workaround for the webfront end
+        data = data.get('data', None)
 
-      # create file in tmp
-      file_obj = open(tmp_path, "w")
-      file_obj.write(binary_data)
-      file_obj.close()
+      if filename and data:
+        # save file to tmp folder
+        tmp_filename = hashMD5(datetime.utcnow())
+        binary_data = base64.b64decode(data)
+        tmp_folder = self.get_tmp_folder()
+        tmp_path = tmp_folder + '/' + tmp_filename
 
-      sha1 = hasher.fileHashSHA1(tmp_path)
-      rel_folder = self.get_rel_folder()
-      dest_path = self.get_dest_folder(rel_folder) + '/' + sha1
+        # create file in tmp
+        file_obj = open(tmp_path, "w")
+        file_obj.write(binary_data)
+        file_obj.close()
 
-      # move it to the correct place
-      move(tmp_path, dest_path)
-      # remove temp folder
-      rmtree(dirname(tmp_path))
+        sha1 = hasher.fileHashSHA1(tmp_path)
+        rel_folder = self.get_rel_folder()
+        dest_path = self.get_dest_folder(rel_folder) + '/' + sha1
 
-      # create attribtues
-      internal_json = json
+        # move it to the correct place
+        move(tmp_path, dest_path)
+        # remove temp folder
+        rmtree(dirname(tmp_path))
 
-      internal_json['value'] = rel_folder + '/' + sha1 + '|' + filename
-      main_attribute = self.create_reference(report, internal_json)
+        # create attribtues
+        internal_json = json
 
-      return [main_attribute]
+        internal_json['value'] = rel_folder + '/' + sha1 + '|' + filename
+        main_attribute = self.create_reference(report, internal_json)
 
+        return [main_attribute]
+
+      else:
+        raise HandlerException('Value is invalid format has to be {"filename": <filename>,"data": <base 64 encoded data> } but was ' + '{0}'.format(value))
     else:
-      raise HandlerException('Value is invalid format has to be {"filename": <filename>,"data": <base 64 encoded data> } but was ' + '{0}'.format(value))
+      reference = self.create_reference(report, json)
+      return [reference]
 
   def get_data(self, reference, parameters):
     if reference:

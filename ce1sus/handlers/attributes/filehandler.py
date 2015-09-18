@@ -26,6 +26,7 @@ from ce1sus.handlers.attributes.generichandler import GenericHandler
 from ce1sus.handlers.base import HandlerException, HandlerNotFoundException
 from ce1sus.helpers.common.hash import hashMD5
 import ce1sus.helpers.common.hash as hasher
+from types import StringType
 
 
 __author__ = 'Weber Jean-Paul'
@@ -124,74 +125,83 @@ class FileHandler(GenericHandler):
     return attribute
 
   def assemble(self, obj, json):
+    #check if it is only a file
+
     value = json.get('value', None)
-    filename = value.get('name', None)
-    data = value.get('data', None)
-    if isinstance(data, types.DictionaryType):
-      # Workaround for the webfront end
-      data = data.get('data', None)
-    result = list()
-    if filename and data:
-      # save file to tmp folder
-      tmp_filename = hashMD5(datetime.utcnow())
-      binary_data = base64.b64decode(data)
-      tmp_folder = self.get_tmp_folder()
-      tmp_path = tmp_folder + '/' + tmp_filename
-
-      # create file in tmp
-      file_obj = open(tmp_path, "w")
-      file_obj.write(binary_data)
-      file_obj.close()
-
-      sha1 = hasher.fileHashSHA1(tmp_path)
-      rel_folder = self.get_rel_folder()
-      dest_path = self.get_dest_folder(rel_folder) + '/' + sha1
-
-      # move it to the correct place
-      move(tmp_path, dest_path)
-      # remove temp folder
-      rmtree(dirname(tmp_path))
-
-      # create attribtues
-      internal_json = json
-      # main
-
-      internal_json['value'] = rel_folder + '/' + sha1
-
-      main_attribute = self.create_attribute(obj, internal_json, True)
-      # secondary
-
-
-      internal_json['value'] = filename
-      self.set_attribute_definition(internal_json, UUID_FILE_NAME)
-      attribute = self.create_attribute(obj, internal_json)
-      result.append(attribute)
-
-      internal_json['value'] = sha1
-      self.set_attribute_definition(internal_json, UUID_HASH_SHA1)
-      attribute = self.create_attribute(obj, internal_json)
-      result.append(attribute)
-
-
-      self.set_object_definition(internal_json, UUID_ARTEFACT)
-      childobj = self.create_object(obj.observable, internal_json)
-
-      rel_obj = RelatedObject()
-      rel_obj.parent = obj
-      rel_obj.parent_id = obj.identifier
-      rel_obj.object = childobj
-      self.set_base(rel_obj, internal_json, childobj)
+    if isinstance(value, dict):
       
-      main_attribute.object = childobj
-      childobj.attributes.append(main_attribute)
-      # attributes.append(main_attribute)
-
-      result.append(rel_obj)
-
-      return result
+      filename = value.get('name', None)
+      data = value.get('data', None)
+      if isinstance(data, types.DictionaryType):
+        # Workaround for the webfront end
+        data = data.get('data', None)
+      result = list()
+      if filename and data:
+        # save file to tmp folder
+        tmp_filename = hashMD5(datetime.utcnow())
+        binary_data = base64.b64decode(data)
+        tmp_folder = self.get_tmp_folder()
+        tmp_path = tmp_folder + '/' + tmp_filename
+  
+        # create file in tmp
+        file_obj = open(tmp_path, "w")
+        file_obj.write(binary_data)
+        file_obj.close()
+  
+        sha1 = hasher.fileHashSHA1(tmp_path)
+        rel_folder = self.get_rel_folder()
+        dest_path = self.get_dest_folder(rel_folder) + '/' + sha1
+  
+        # move it to the correct place
+        move(tmp_path, dest_path)
+        # remove temp folder
+        rmtree(dirname(tmp_path))
+  
+        # create attribtues
+        internal_json = json
+        # main
+  
+        internal_json['value'] = rel_folder + '/' + sha1
+  
+        main_attribute = self.create_attribute(obj, internal_json, True)
+        # secondary
+  
+  
+        internal_json['value'] = filename
+        self.set_attribute_definition(internal_json, UUID_FILE_NAME)
+        attribute = self.create_attribute(obj, internal_json)
+        result.append(attribute)
+  
+        internal_json['value'] = sha1
+        self.set_attribute_definition(internal_json, UUID_HASH_SHA1)
+        attribute = self.create_attribute(obj, internal_json)
+        result.append(attribute)
+  
+  
+        self.set_object_definition(internal_json, UUID_ARTEFACT)
+        childobj = self.create_object(obj.observable, internal_json)
+  
+        rel_obj = RelatedObject()
+        rel_obj.parent = obj
+        rel_obj.parent_id = obj.identifier
+        rel_obj.object = childobj
+        self.set_base(rel_obj, internal_json, childobj)
+        
+        main_attribute.object = childobj
+        childobj.attributes.append(main_attribute)
+        # attributes.append(main_attribute)
+  
+        result.append(rel_obj)
+  
+        return result
+  
+      else:
+        raise HandlerException('Value is invalid format has to be {"name": <name>,"data": <base 64 encoded data> }')
 
     else:
-      raise HandlerException('Value is invalid format has to be {"name": <name>,"data": <base 64 encoded data> }')
+      # is not a file but usable for update
+      attribute = self.create_attribute(obj, json)
+      return [attribute]
 
   def get_data(self, attribute, parameters):
     if attribute:
@@ -294,6 +304,8 @@ class FileWithHashesHandler(FileHandler):
 
   def assemble(self, obj, json):
     result = super(FileWithHashesHandler, self).assemble(obj, json)
+    if len(result) == 1:
+      return result
 
     internal_json = json
     for item in result:

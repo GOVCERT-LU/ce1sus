@@ -199,6 +199,9 @@ class BaseView(object):
     :returns: User
     """
     user = self._get_from_session(SESSION_USER)
+    if user:
+      return self.user_controller.get_user_by_id(user.identifier)
+
     return user
 
   def get_authorized_cache(self):
@@ -292,9 +295,6 @@ class BaseView(object):
 
   def __make_user_object(self, user):
     # TODO: make user offline
-    for item in user.group.children:
-      make_transient(item)
-    make_transient(user.group)
-    make_transient(user)
+
 
     return user

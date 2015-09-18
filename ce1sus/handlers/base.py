@@ -125,8 +125,9 @@ class HandlerBase(object):
 
     if json and change_base_element:
       # populate properties
-      instance.properties.is_validated = json.get('validated', False)
-      instance.properties.is_shareable = json.get('shared', False)
+      properties = json.get('properties', {})
+      instance.properties.is_validated = properties.get('validated', False)
+      instance.properties.is_shareable = properties.get('shared', False)
       self.cache_object.permission_controller.set_properties_according_to_permisssions(instance, self.cache_object)
 
       # populate tlp

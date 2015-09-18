@@ -29,9 +29,12 @@ class Updater(BaseController):
     cache_object.insert = False
     classname = instance.get_classname()
     self.logger.debug('Updating {0}'.format(classname))
+    parent = instance.parent
     if hasattr(instance, 'parent'):
       parent = instance.parent
       if parent:
+        if hasattr(parent, 'definition'):
+          parent.definition.attributes
         make_transient(parent)
         pass
     else:
