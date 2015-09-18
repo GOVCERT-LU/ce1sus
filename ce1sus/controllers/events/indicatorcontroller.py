@@ -208,7 +208,7 @@ class IndicatorController(BaseController):
     try:
       indicators = list()
       
-      flat_attribtues = self.self.path_controller.get_flat_attributes(event, cache_object, True)
+      flat_attribtues = self.path_controller.get_flat_attributes(event, cache_object, True)
       
       mal_email = list()
       ips = list()

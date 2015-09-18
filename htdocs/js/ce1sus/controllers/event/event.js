@@ -29,7 +29,7 @@ app.controller("eventController", function($scope, Restangular,messages,
                    ];
   
   $scope.pushItem = function(event, guiOpen) {
-    found = false;
+    var found = false;
     for (var i = 0; i < $scope.openedEvents.length; i++) {
       if ($scope.openedEvents[i].identifier == event.identifier){
         found = true;
@@ -97,7 +97,8 @@ app.controller("viewEventController", function($scope, Restangular, messages,
 app.controller("eventObservableController", function($scope, Restangular, messages,
     $log, $routeSegment, $location,observables, $anchorScroll, $filter, ngTableParams) {
   $scope.permissions=$scope.event.userpermissions;
-  $scope.getAttributes=function(){
+  
+  function getAttributes(){
     var attributes = [];
     function generateItems(object, observable, composed){
       var item = {};
@@ -160,35 +161,47 @@ app.controller("eventObservableController", function($scope, Restangular, messag
       processObservavle($scope.observables[i], null);
     }
     return attributes;
-  };
+  }
   
   $scope.observables = observables;
   $scope.flat=false;
-  /*
+  $scope.flatAttributes = [];
+
+  $scope.attribuesTable = new ngTableParams({
+    page: 1,            // show first page
+    count: 10,           // count per page
+  }, {
+      total: $scope.flatAttributes.length, // length of data
+      getData: function($defer, params) {
+        var orderedData = params.filter() ? $filter('filter')($scope.flatAttributes, params.filter()) : $scope.flatAttributes;
+        orderedData = params.sorting() ? $filter('orderBy')(orderedData, params.orderBy()) : orderedData;
+        orderedData = orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count());
+        $defer.resolve(orderedData);
+      }
+  }); 
+  
+  $scope.getColor = function(attribute){
+    if (attribute.properties.proposal && !attribute.properties.validated){
+      return 'background-color: yellow;';
+    }else {
+      if (!attribute.properties.proposal && !attribute.properties.validated){
+        return 'background-color: red;';
+      } else {
+        
+      }
+    }
+  };
+  
   $scope.showFlat=function(){
     $scope.flat=true;
-    $scope.flatAttributes = $scope.getAttributes();
-    $scope.pagination = Pagination.getNew(10,'flatAttributes');
-    $scope.pagination.numPages = Math.ceil($scope.flatAttributes.length/$scope.pagination.perPage);
-    $scope.pagination.setPages();
-  };
-  */
-  $scope.showStructured=function(){
-    $scope.flat=false;
+    $scope.flatAttributes = getAttributes();
+    $scope.attribuesTable.reload();
   };
 
-  $scope.writeTD=function(attribute, pagination){
-    var currentPosition = $scope.flatAttributes.indexOf(attribute);
-    if (currentPosition> 0){
-      if ($scope.flatAttributes[currentPosition-1].composedlength == attribute.composedlength){
-        if (currentPosition == pagination.page * pagination.perPage){
-          return true;
-        }
-        return false;
-      }
-      return true;
-    } 
-    return true;
+  $scope.showStructured=function(){
+    $scope.flat=false;
+    $scope.flatAttributes = [];
+    $scope.attribuesTable.reload();
   };
   
   $scope.getFlatTitle = function(attributeflat){
@@ -208,39 +221,6 @@ app.controller("eventObservableController", function($scope, Restangular, messag
     return "Unknown";
   };
 
-  $scope.getRowSpan = function(attribute, pagination){
-    var rowspan = 0;
-    if (attribute.composedlength) {
-      var currentLength = attribute.composedlength;
-      var currentPosition = $scope.flatAttributes.indexOf(attribute);
-      var startindex = 0;
-      for (var i = currentPosition; i >= 0; i--){
-        if ($scope.flatAttributes[i].composedlength){
-          if (currentLength != $scope.flatAttributes[i].composedlength){
-            startindex = i;
-            break;
-          }
-        }
-      }
-      var endPosition = (startindex + currentLength);
-      var remaining = endPosition - (pagination.page * pagination.perPage);
-      //TODO review I wonder why this works!? td is set incorrectly but stops where expected
-      if (remaining > 0) {
-        rowspan = remaining;
-        if (startindex > 0){
-          rowspan++;
-        }
-      } else {
-        rowspan = pagination.perPage+remaining;
-      }
-      
-
-    } else {
-      rowspan = 1;
-    }
-      
-    return rowspan;
-  };
   $scope.dropdown = [
                        {
                          "text": "Structured",
@@ -258,10 +238,10 @@ app.controller("eventObservableController", function($scope, Restangular, messag
 });
 
 app.controller("eventIndicatorController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location,indicators, $anchorScroll, Pagination) {
+    $log, $routeSegment, $location,indicators, $anchorScroll, ngTableParams, $filter) {
   $scope.permissions=$scope.event.userpermissions;
   
-  $scope.getAttributes=function(){
+  function getAttributes(){
     var attributes = [];
     function generateItems(object, observable, composed){
       var item = {};
@@ -326,33 +306,36 @@ app.controller("eventIndicatorController", function($scope, Restangular, message
       }
     }
     return attributes;
-  };
+  }
+  
+
   
   $scope.indicators = indicators;
   $scope.flat=false;
+  $scope.flatAttributes = [];
+  
+  $scope.attribuesTable = new ngTableParams({
+    page: 1,            // show first page
+    count: 10,           // count per page
+  }, {
+      total: $scope.flatAttributes.length, // length of data
+      getData: function($defer, params) {
+        var orderedData = params.filter() ? $filter('filter')($scope.flatAttributes, params.filter()) : $scope.flatAttributes;
+        orderedData = params.sorting() ? $filter('orderBy')(orderedData, params.orderBy()) : orderedData;
+        orderedData = orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count());
+        $defer.resolve(orderedData);
+      }
+  }); 
+  
   $scope.showFlat=function(){
     $scope.flat=true;
-    $scope.flatAttributes = $scope.getAttributes();
-    $scope.pagination = Pagination.getNew(10,'flatAttributes');
-    $scope.pagination.numPages = Math.ceil($scope.flatAttributes.length/$scope.pagination.perPage);
-    $scope.pagination.setPages();
+    $scope.flatAttributes = getAttributes();
+    $scope.attribuesTable.reload();
   };
   $scope.showStructured=function(){
     $scope.flat=false;
-  };
-
-  $scope.writeTD=function(attribute, pagination){
-    var currentPosition = $scope.flatAttributes.indexOf(attribute);
-    if (currentPosition> 0){
-      if ($scope.flatAttributes[currentPosition-1].composedlength == attribute.composedlength){
-        if (currentPosition == pagination.page * pagination.perPage){
-          return true;
-        }
-        return false;
-      }
-      return true;
-    } 
-    return true;
+    $scope.flatAttributes = [];
+    $scope.attribuesTable.reload();
   };
   
   $scope.getFlatTitle = function(attributeflat){
@@ -372,39 +355,18 @@ app.controller("eventIndicatorController", function($scope, Restangular, message
     return "Unknown";
   };
 
-  $scope.getRowSpan = function(attribute, pagination){
-    var rowspan = 0;
-    if (attribute.composedlength) {
-      var currentLength = attribute.composedlength;
-      var currentPosition = $scope.flatAttributes.indexOf(attribute);
-      var startindex = 0;
-      for (var i = currentPosition; i >= 0; i--){
-        if ($scope.flatAttributes[i].composedlength){
-          if (currentLength != $scope.flatAttributes[i].composedlength){
-            startindex = i;
-            break;
-          }
-        }
-      }
-      var endPosition = (startindex + currentLength);
-      var remaining = endPosition - (pagination.page * pagination.perPage);
-      //TODO review I wonder why this works!? td is set incorrectly but stops where expected
-      if (remaining > 0) {
-        rowspan = remaining;
-        if (startindex > 0){
-          rowspan++;
-        }
+  $scope.getColor = function(attribute){
+    if (attribute.properties.proposal && !attribute.properties.validated){
+      return 'background-color: yellow;';
+    }else {
+      if (!attribute.properties.proposal && !attribute.properties.validated){
+        return 'background-color: red;';
       } else {
-        rowspan = pagination.perPage+remaining;
+        
       }
-      
-
-    } else {
-      rowspan = 1;
     }
-      
-    return rowspan;
   };
+  
   $scope.dropdown = [
                        {
                          "text": "Structured",
