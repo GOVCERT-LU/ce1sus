@@ -38,6 +38,7 @@ syslog=no
 server=
 usetls=True
 users_dn=
+filter=(uid=*)
 
 #Configuration for the smtp server
 [Mailer]
@@ -54,10 +55,6 @@ expiredate=2023-01-01
 [MISPAdapter]
 dump=yes
 file=mispdump
-
-[OpenIOCAdapter]
-file=openiocdump
-dump=yes
 
 [ErrorMails]
 enabled=yes
