@@ -14,7 +14,7 @@ from ce1sus.db.classes.internal.usrmgt.user import User
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
-from ce1sus.views.web.common.decorators import privileged
+from ce1sus.views.web.common.decorators import privileged, groupmanager
 
 
 __author__ = 'Weber Jean-Paul'
@@ -151,3 +151,30 @@ class AdminUserHandler(RestBaseHandler):
       raise RestHandlerNotFoundException(error)
     except ControllerException as error:
       raise RestHandlerException(error)
+
+
+  @rest_method()
+  @methods(allowed=['GET', 'PUT'])
+  @require()
+  def profile(self, **args):
+    method = args.get('method')
+    path = args.get('path')
+    json = args.get('json')
+    cache_object = self.get_cache_object(args)
+    if method == 'GET':
+      return self.get_user().to_dict(cache_object)
+    elif method == 'PUT':
+      pass
+
+  @rest_method()
+  @methods(allowed=['GET', 'PUT'])
+  @require(groupmanager())
+  def group(self, **args):
+    method = args.get('method')
+    path = args.get('path')
+    json = args.get('json')
+    cache_object = self.get_cache_object(args)
+    if method == 'GET':
+      pass
+    elif method == 'PUT':
+      pass

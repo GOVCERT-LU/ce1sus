@@ -77,7 +77,7 @@ class Indicator(BaseCoreComponent, Base):
   producer = relationship('InformationSource', secondary=_REL_INDICAOTR_INFORMATIONSOURCE, uselist=False)
   observables = relationship('Observable', secondary=_REL_INDICATOR_OBSERVABLE, back_populates='indicator')
   types = relationship(IndicatorType)
-  confidence = relationship(Confidence, secondary=_REL_INDICATOR_CONFIDENCE, uselist=False)
+  confidence = relationship(Confidence, secondary=_REL_INDICATOR_CONFIDENCE, uselist=False, back_populates='indicator')
   indicated_ttps = relationship('RelatedTTP', secondary=_REL_INDICATOR_RELATED_TTPS)
   test_mechanisms = relationship(BaseTestMechanism)
   alternative_id = Column('alternative_id', UnicodeType(255))
@@ -123,9 +123,16 @@ class Indicator(BaseCoreComponent, Base):
   negate = Column('negate', Boolean, default=None)
   related_packages = relationship('RelatedPackageRef', secondary=_REL_INDICATOR_RELATED_PACKAGES)
 
-  def to_dict(self, cache_object):
+
+  def get_populated(self, cache_object):
+    old_value = cache_object.small
     cache_object.small = True
-    instance = self.get_instance([Indicator.producer, Indicator.confidence], cache_object)
+    ind = self.get_instance([Indicator.producer, Indicator.confidence], cache_object)
+    cache_object.small = old_value
+    return ind
+
+  def to_dict(self, cache_object):
+    instance = self.get_populated(cache_object)
     observables = instance.attributelist_to_dict('observables', cache_object)
     observables_count = len(observables)
     if cache_object.complete:

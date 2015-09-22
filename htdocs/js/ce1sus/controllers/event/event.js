@@ -1105,7 +1105,7 @@ app.controller("eventErrorController", function($scope, Restangular, messages,
   
   $scope.errorsTable = new ngTableParams({
     page: 1,            // show first page
-    count: 10,           // count per page
+    count: 2,           // count per page
   }, {
       total: $scope.errors.length, // length of data
       getData: function($defer, params) {

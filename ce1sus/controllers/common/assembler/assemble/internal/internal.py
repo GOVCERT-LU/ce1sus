@@ -19,7 +19,7 @@ from ce1sus.db.classes.internal.attributes.attribute import Condition
 from ce1sus.db.classes.internal.backend.mailtemplate import MailTemplate
 from ce1sus.db.classes.internal.backend.servers import SyncServer, ServerMode
 from ce1sus.db.classes.internal.backend.types import AttributeType
-from ce1sus.db.classes.internal.definitions import AttributeDefinition, ObjectDefinition
+from ce1sus.db.classes.internal.definitions import AttributeDefinition, ObjectDefinition, ChildObjectDefintion
 from ce1sus.db.classes.internal.report import ReferenceDefinition
 from ce1sus.db.classes.internal.usrmgt.group import Group, EventPermissions
 from ce1sus.db.classes.internal.usrmgt.user import User, UserRights
@@ -270,6 +270,25 @@ class Ce1susAssembler(BaseAssembler):
       mail_template.subject = json.get('subject', None)
       return mail_template
 
+  def assemble_child_object_defintion(self, json, cache_object):
+    try:
+      if json:
+        child_object = ChildObjectDefintion()
+        self.set_base(child_object, json, cache_object, None)
+        definition = json.get('definition', None)
+        definition_uuid = definition.get('identifier', None)
+        try:
+          definition = self.obj_def_broker.get_by_uuid(definition_uuid)
+        except NothingFoundException:
+          definition = self.assemble_object_definition(definition, cache_object)
+        child_object.definition = definition
+        options = json.get('properties', None)
+        if options:
+          child_object.list_type = options.get('list_type', False)
+        return child_object
+    except BrokerException as error:
+      raise AssemblerException(error)
+
   def assemble_attribute_type(self, json, cache_object):
     if json:
       attr_type = AttributeType()
@@ -314,4 +333,10 @@ class Ce1susAssembler(BaseAssembler):
         except BrokerException as error:
           raise AssemblerException(error)
         obj_def.attributes.append(attribute)
+
+      child_objs = json.get('objects', list())
+      for child in child_objs:
+        child = self.assemble_child_object_defintion(child, cache_object)
+        obj_def.objects.append(child)
+
       return obj_def

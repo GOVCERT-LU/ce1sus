@@ -67,8 +67,12 @@ class STIXHeader(Entity, Base):
   _PARENTS = ['event']
   event = relationship('Event', uselist=False)
 
+
+  def get_populated(self, cache_object):
+    return self.get_instance([STIXHeader.handling, STIXHeader.information_source], cache_object)
+
   def to_dict(self, cache_object):
-    instance = self.get_instance([STIXHeader.handling, STIXHeader.information_source], cache_object)
+    instance = self.get_populated(cache_object)
 
     if cache_object.complete:
       result = {'package_intents': instance.attributelist_to_dict('package_intents', cache_object),

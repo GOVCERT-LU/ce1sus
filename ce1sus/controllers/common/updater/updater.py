@@ -29,7 +29,7 @@ class Updater(BaseController):
     cache_object.insert = False
     classname = instance.get_classname()
     self.logger.debug('Updating {0}'.format(classname))
-    parent = instance.parent
+
     if hasattr(instance, 'parent'):
       parent = instance.parent
       if parent:

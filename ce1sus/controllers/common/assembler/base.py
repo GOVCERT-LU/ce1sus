@@ -133,7 +133,7 @@ class BaseAssembler(BaseChanger):
       if value:
         value = strings.stringToDateTime(value)
         instance.value = value
-      instance.precision = json.get('precision', 'seconds')
+      instance.precision = json.get('precision', 'second')
       return instance
 
   def assemble_cybox_time(self, parent, json, cache_object):

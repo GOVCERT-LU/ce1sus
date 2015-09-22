@@ -48,6 +48,8 @@ class Object(Entity, Base):
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition')
   observable = relationship('Observable', secondary=_REL_OBSERVABLE_OBJECT, uselist=False)
+  parent_id = Column('parent_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), index=True)
+  objects = relationship('Object', primaryjoin='Object.parent_id==Object.identifier')
 
   related_object = relationship('RelatedObject', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
   @property
@@ -63,9 +65,11 @@ class Object(Entity, Base):
   
   _PARENTS = ['observable', 'related_object']
 
+  def get_populated(self, cache_object):
+    return self.get_instance([Object.definition], cache_object)
 
   def to_dict(self, cache_object):
-    instance = self.get_instance([Object.definition], cache_object)
+    instance = self.get_populated(cache_object)
 
     cache_object_defs = cache_object.make_copy()
     cache_object_defs.inflated = False

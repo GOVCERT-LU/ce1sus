@@ -160,14 +160,15 @@ class PseudoCyboxAssembler(BaseAssembler):
         cache_object.seen_attr_defs[uuid] = definition
 
         # check if attribute definition in object definition
-        if not bypass_object_check:
+        if bypass_object_check:
+          self.logger.debug('Attribute object checks are disables')
+          return definition
+        else:
           for attr_def in parent.definition.attributes:
             if attr_def.uuid == uuid:
               return definition
           self.log_attribute_error(parent, json, 'Attribute definition is not contained in object definition {0}'.format(parent.definition.name))
-        else:
-          self.logger.debug('Attribute object checks are disables')
-          return definition
+
     else:
       self.log_attribute_error(parent, json, 'Attribute does not contain an attribute definition')
 
@@ -211,6 +212,8 @@ class PseudoCyboxAssembler(BaseAssembler):
       for attribute in attributes:
         if not attribute.validate():
           error_message = ObjectValidator.getFirstValidationError(attribute)
+          # remove failedFalidations
+          ObjectValidator.reset(attribute)
           self.log_attribute_error(observable.object, attribute.to_dict(cache_object), error_message)
           # remove attribute from object
           observable.object.attributes.remove(attribute)
@@ -286,6 +289,7 @@ class PseudoCyboxAssembler(BaseAssembler):
                 obj.attributes.append(returnvalue)
               else:
                 error_message = ObjectValidator.getFirstValidationError(returnvalue)
+                ObjectValidator.reset(returnvalue)
                 self.log_attribute_error(obj, returnvalue.to_dict(cache_object), error_message)
             else:
               raise AssemblerException('Return value of attribute handler {0} is not a list of Observable, RelatedObject or Attribute'.format(returnvalue))

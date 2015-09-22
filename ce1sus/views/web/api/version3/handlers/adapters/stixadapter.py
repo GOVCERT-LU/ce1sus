@@ -7,7 +7,6 @@ Created on 7 Sep 2015
 """
 from base64 import b64decode
 import cherrypy
-from json import dumps
 
 from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
@@ -97,6 +96,8 @@ class STIXHandler(AdapterHandlerBase):
   def event(self, **args):
     try:
       cache_object = self.get_cache_object(args)
+      cache_object.inflated = True
+      cache_object.complete = True
       method = args.get('method', None)
       path = args.get('path')
       requested_object = self.parse_path(path, method)

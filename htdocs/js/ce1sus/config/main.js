@@ -83,6 +83,10 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/admin/jobs/help", "main.layout.admin.bgjobs.help")
         .when("/admin/jobs/jobs", "main.layout.admin.bgjobs.jobs")
         
+        .when("/user", "main.layout.user")
+        .when("/user/profile", "main.layout.user.profile")
+        .when("/user/group", "main.layout.user.group")
+        
         .when("/admin/object", "main.layout.admin.object")
         .when("/admin/object/:id", "main.layout.admin.object.objectDetails")
         .when("/admin/type", "main.layout.admin.type")
@@ -151,6 +155,57 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                        controller: 'errorController'
                      }
                    })
+                   
+                  .segment('user', {
+                     templateUrl: 'pages/user/layout.html',
+                   })
+                   .within()
+                    .segment('profile', {
+                      'default': true,
+                       templateUrl: 'pages/user/user.html',
+                       controller: 'userProfileController',
+                       resolve: {
+                         user: function(Restangular) {
+                           return Restangular.one("user", "profile").get({"complete": true, "inflated": true}).then(function(data) {
+                               return data;
+                             }, function(response) {
+                               throw generateErrorMessage(response);
+                             });
+                         }
+                       },
+                       untilResolved: {
+                         templateUrl: 'pages/common/loading.html',
+                         controller: 'loadingController'
+                       },
+                       resolveFailed: {
+                         templateUrl: 'pages/common/error.html',
+                         controller: 'errorController'
+                       }
+                     })
+                    .segment('group', {
+                       templateUrl: 'pages/user/group.html',
+                       controller: 'userGroupController',
+                       resolve: {
+                         group: function(Restangular) {
+                           return Restangular.one("user", "group").get({"complete": true, "inflated": true}).then(function(data) {
+                               return data;
+                             }, function(response) {
+                               throw generateErrorMessage(response);
+                             });
+                         }
+                       },
+                       untilResolved: {
+                         templateUrl: 'pages/common/loading.html',
+                         controller: 'loadingController'
+                       },
+                       resolveFailed: {
+                         templateUrl: 'pages/common/error.html',
+                         controller: 'errorController'
+                       }
+                     })
+                   .up()
+                   
+                   
                    .segment('activate', {
                      templateUrl: 'pages/activate.html',
                      controller: 'activationController',
@@ -1059,6 +1114,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  },
                                  showLdapBtn: function(Restangular) {
                                    return Restangular.oneUrl("ldapusers", "/plugins/is_plugin_avaibable/ldap").get().then(function (ldapusers) {
+                                     
                                      if (ldapusers) {
                                        return true;
                                      } else {
@@ -1070,6 +1126,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  },
                                  users: function(Restangular,$routeSegment) {
                                    return Restangular.one("user").getList(null, {"complete": false}).then(function (users) {
+                                     alert(users);
                                      return users;
                                    
                                    }, function(response) {

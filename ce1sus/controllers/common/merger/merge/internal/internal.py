@@ -149,4 +149,8 @@ class Ce1susMerger(BaseMerger):
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
 
-
+  def merge_child_object_defintion(self, old_instance, new_instance, merge_cache, attr_name=None):
+    if old_instance and new_instance:
+      merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'list_type', merge_cache))
+    # TODO recursive
+    return merge_cache.version

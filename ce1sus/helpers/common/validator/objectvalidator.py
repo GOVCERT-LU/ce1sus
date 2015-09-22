@@ -148,6 +148,14 @@ class ObjectValidator(object):
     return ''
 
   @staticmethod
+  def reset(obj):
+    fields = get_fields(obj)
+    for field_name in fields:
+      value = getattr(obj, field_name)
+      if type(value) == FailedValidation:
+        setattr(obj, field_name, value.value)
+
+  @staticmethod
   def validateAlNum(obj,
                     attributeName,
                     minLength=0,

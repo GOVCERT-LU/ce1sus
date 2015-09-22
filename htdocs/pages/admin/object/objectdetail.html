@@ -45,4 +45,55 @@
   </div>
 </div>
 
+<div>
 <add-rem-table title="Attribute" associated="object.attributes" all="attributes" route="attribute" owner="object"/>
+</div>
+<h4>Inner Objects Management:</h4>
+<div class="row">
+  <div class="col-md-6">
+    
+    <table border="0" cellpadding="5" width="100%">
+      <tbody>
+        <tr>
+          <td><label>Associated Objects:</label> <select
+            class="form-control" size="10" multiple="multiple"
+            ng-options="child.identifier as child.definition.name for child in associated"
+            ng-model="selected_accociated" ng-change="setOptions()">
+          </select></td>
+          <td align="center">
+            <button class="btn btn-default" type="button"
+              ng-click="objectRemove()">&gt;</button> <br>
+            <button class="btn btn-default" type="button"
+              ng-click="objectAdd()">&lt;</button>
+          </td>
+          <td><label><b>Remaining</b> Objects:</label> <select
+            class="form-control" size="10" multiple="multiple"
+            ng-options="rem_child.identifier as rem_child.name for rem_child in remaining"
+            ng-model="selected_remaining" ng-change="setRemOptions()">
+          </select></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <label>Options:</label>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">List Type</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="add" value="add"
+          ng-model="options.list_type"
+          ng-disabled="multiple">
+
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-offset-2 col-lg-10">
+        <div class="btn-group">
+          <button name="submit" type="submit" class="btn btn-primary" ng-click="submitChanges()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

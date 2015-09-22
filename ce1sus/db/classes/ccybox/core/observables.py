@@ -119,9 +119,11 @@ class Observable(Entity, Base):
   def validate(self):
     return True
 
-  def to_dict(self, cache_object):
-    instance = self.get_instance([], cache_object)
+  def get_populated(self, cache_object):
+    return self.get_instance([Observable.description, Observable.object, Observable.observable_composition, Observable.keywords], cache_object)
 
+  def to_dict(self, cache_object):
+    instance = self.get_populated(cache_object)
 
     if cache_object.inflated:
       obj = instance.attribute_to_dict(instance.object, cache_object)

@@ -29,7 +29,7 @@ __license__ = 'GPL v3+'
 class Statement(Entity, Base):
 
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
-  timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'seconds')
+  timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'second')
   value = Column('value', UnicodeType(255), nullable=False)
   description = relationship('StructuredText', secondary=_REL_STATEMENT_STRUCTUREDTEXT, uselist=False)
   source = relationship('InformationSource', uselist=False, secondary=_REL_STATEMENT_INFORMATIONSOURCE)

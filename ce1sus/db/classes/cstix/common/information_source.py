@@ -62,7 +62,6 @@ class InformationSourceRole(Entity, Base):
       self.__role = VocabInformationSourceRole(self, 'role_id')
     self.__role.name = role
 
-
   def to_dict(self, cache_object):
     result = {'name': self.convert_value(self.role)}
     parent_dict = Entity.to_dict(self, cache_object)
@@ -107,6 +106,7 @@ class InformationSource(Entity, Base):
               'incident_reporter',
               'incident_responder',
               'incident_coordinators',
+              'indicator',
               'campaign',
               'exploittarget',
               'incident',
@@ -161,8 +161,11 @@ class InformationSource(Entity, Base):
   def exploit_target(self, value):
     self.exploittarget = value
 
+  def get_populated(self, cache_object):
+    return self.get_instance([InformationSource.roles, InformationSource.identity, InformationSource.time], cache_object)
+
   def to_dict(self, cache_object):
-    instance = self.get_instance([InformationSource.roles, InformationSource.identity, InformationSource.time], cache_object)
+    instance = self.get_populated(cache_object)
 
     copy = cache_object.make_copy()
     copy.inflated = True

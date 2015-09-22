@@ -27,16 +27,36 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2015, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-UNMAPPABLE_FIELDS = ['errors', 'attributes', 'groups', 'parent', 'path', 'modifier', 'modifier_id', 'creator', 'creator_id', 'creator_group', 'creator_group_id', 'reports']
+UNMAPPABLE_FIELDS = ['errors', 
+                     'attributes', 
+                     'groups', 
+                     'parent', 
+                     'path', 
+                     'modifier', 
+                     'modifier_id', 
+                     'creator', 
+                     'creator_id', 
+                     'creator_group', 
+                     'creator_group_id', 
+                     'reports', 
+                     'object']
+
+UNSETTABLE_FIELDS = ['object_']
 
 STIX_SPECIAL_MAPPINGS = {InformationSourceRole: 'map_information_source_role',
                          Object: 'map_object'}
+
+STIX_SPECIAL_ATTRIBUTES = {'type': 'type_'}
 
 SPECIAL_ATTR_MAPPINGS = {'ipv4_addr': 'map_ip_address'
                          }
 
 SPECIAL_ATTR_PROP_MAPPINGS = {'DomainName_Value':'value',
-                              'url':'value'}
+                              'url':'value',
+                              'Process_Name':'name'}
+
+INT_OBJ_MAPPING = {'WinHandle':('handle_list', True),
+                   }
 
 class Ce1susSTIXException(Exception):
   pass
@@ -86,11 +106,15 @@ class Ce1susSTIX(BaseController):
 
 
   def map_instance(self, instance, cache_object, parent=None):
+    # load up all instance
+    instance = instance.get_populated(cache_object)
+
     if self.permission_controller.is_instance_viewable(instance, cache_object):
       clazz = self.__get_class(instance)
       if clazz:
         if isinstance(clazz, StringType):
           getattr(self, clazz)(instance, parent, cache_object)
+          pass
         else:
           stix_instance = clazz()
           if hasattr(stix_instance, 'handling'):
@@ -110,8 +134,11 @@ class Ce1susSTIX(BaseController):
                       new_value.append(result)
                 else:
                   new_value = value
-  
-                setattr(stix_instance, field, new_value)
+
+                if field in STIX_SPECIAL_ATTRIBUTES.keys():
+                  field = STIX_SPECIAL_ATTRIBUTES.get(field)
+                if field not in UNSETTABLE_FIELDS:
+                  setattr(stix_instance, field, new_value)
           # workaround
           if hasattr(stix_instance, 'composite_indicator_expression'):
             stix_instance.composite_indicator_expression = None
@@ -154,7 +181,37 @@ class Ce1susSTIX(BaseController):
               h.type_.condition = 'Equals'
               break
 
-  def map_object(self, instance, stix_object, cache_object):
+  def map_internal_object(self, def_name, cybox_object, attribute, cache_object):
+    new_def_name = def_name.split('_', 1)[0]
+    
+    
+    attr_name, uses_list = INT_OBJ_MAPPING.get(new_def_name, None)
+    if attr_name:
+      #check the object has been set
+      value = getattr(cybox_object, attr_name)
+      if value:
+        pass
+      else:
+        #create new instance
+        pass
+      
+      
+      #clazz = get_class('cybox.objects.{0}_object'.format(self.get_modulename(new_def_name)), new_def_name)
+      if uses_list:
+        list_clazz = get_class('cybox.objects.{0}_object'.format(self.get_modulename(new_def_name)), '{0}List'.format(new_def_name))
+        items = list_clazz()
+        
+        items.append(clazz)
+        
+    else:
+      raise Ce1susSTIXException('Attribute mapping for {0} and {1} is not defined'.format(get_fqcn(cybox_object), new_def_name))
+    
+    attr_name = def_name.rsplit('_',)[1]
+    pass
+
+    
+
+  def map_object(self, instance, stix_observable, cache_object):
     if self.permission_controller.is_instance_viewable(instance, cache_object):
       # create cybox object
       if instance.definition.cybox_std:
@@ -171,12 +228,16 @@ class Ce1susSTIX(BaseController):
                 setattr(cybox_object, self.get_property_name(attr_def_name), attribute.value)
                 self.map_condition(getattr(cybox_object, self.get_property_name(attr_def_name)), attribute)
               else:
-                raise Ce1susSTIXException('{0} has not property {1}'.format(def_name, attr_def_name))
+                new_def_name = attr_def_name.split('_', 1)
+                if len(new_def_name) == 2:
+                  self.map_internal_object(attr_def_name, cybox_object, attribute, cache_object)
+                else:
+                  raise Ce1susSTIXException('{0} has not property {1}'.format(def_name, attr_def_name))
             else:
               if not cybox_object.custom_properties:
                 cybox_object.custom_properties = CustomProperties()
               cybox_object.custom_properties.append(self.create_custom_property(attribute))
-  
+
             self.map_condition(cybox_object, attribute)
       else:
         cybox_object = Custom()
@@ -186,7 +247,8 @@ class Ce1susSTIX(BaseController):
         for attribute in instance.attributes:
           if self.permission_controller.is_instance_viewable(attribute, cache_object):
             cybox_object.custom_properties.append(self.create_custom_property(attribute))
-      stix_object.object_ = CyboxObject(cybox_object)
+
+      stix_observable.object_ = CyboxObject(cybox_object)
 
   def map_ip_address(self, instance, stix_object, cache_object):
     if self.permission_controller.is_instance_viewable(instance, cache_object):

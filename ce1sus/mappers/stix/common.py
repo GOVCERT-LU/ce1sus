@@ -23,6 +23,7 @@ from ce1sus.db.classes.cstix.indicator.indicator import Indicator, IndicatorType
 from ce1sus.db.classes.cstix.indicator.sightings import Sighting
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.ccybox.common.measuresource import MeasureSource
+from ce1sus.db.classes.cstix.extensions.test_mechanism.snort_test_mechanism import SnortTestMechanism
 
 
 __author__ = 'Weber Jean-Paul'
@@ -66,7 +67,9 @@ CLASS_MAP = {'stix.core.stix_package.STIXPackage': Event,
              'cybox.common.tools.ToolInformationList': 'handle_list',
              'cybox.common.tools.ToolInformation': ToolInformation,
              'cybox.common.measuresource.MeasureSource': MeasureSource,
-             'cybox.common.structured_text.StructuredText': StructuredText
+             'cybox.common.structured_text.StructuredText': StructuredText,
+             'stix.extensions.test_mechanism.snort_test_mechanism.SnortTestMechanism': SnortTestMechanism,
+             'stix.extensions.test_mechanism.snort_test_mechanism._EncodedCDATAs': 'handle_list'
              }
 
 def get_fqcn(instance):

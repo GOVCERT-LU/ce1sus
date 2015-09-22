@@ -801,6 +801,8 @@ class Migrator(object):
     self.__drop_fk(Object, 'objects_ibfk_6')
     self.__drop_fk(Object, 'objects_ibfk_8')
     self.__drop_fk(Object, 'objects_ibfk_7')
+    self.__add_column(Object, 'parent_id')
+    self.__add_fk(Object, 'parent_id', 'objects_ibfk_5')
     self.__drop_column(Object, 'originating_group_id')
     self.__drop_column(Object, 'owner_group_id')
 

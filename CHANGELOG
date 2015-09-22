@@ -16,6 +16,7 @@ Release 0.11.1
 * Revision dumps
 * Small improvements in GUI 
 * Deprecated 0.10.X
+* User Profile and Group managment for user with the permission to administer it's own group
 
 Release 0.11.0
 --------------

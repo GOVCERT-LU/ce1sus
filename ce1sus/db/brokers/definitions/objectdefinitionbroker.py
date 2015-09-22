@@ -10,7 +10,7 @@ import sqlalchemy.orm.exc
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.definitionbase import DefinitionBrokerBase
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
-from ce1sus.db.classes.internal.definitions import ObjectDefinition, AttributeDefinition
+from ce1sus.db.classes.internal.definitions import ObjectDefinition, AttributeDefinition, ChildObjectDefintion
 from ce1sus.db.common.broker import NothingFoundException, BrokerException, IntegrityException
 
 
@@ -129,6 +129,25 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
         self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Attribute or Object not found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
+  def get_child_object_definitions_by_uuid(self, uuid):
+    try:
+      return self.session.query(ChildObjectDefintion).filter(ChildObjectDefintion.uuid == uuid).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'Child or Object not found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
+  def remove_child_object_definitions_by_uuid(self, uuid, commit=True):
+    try:
+      self.session.query(ChildObjectDefintion).filter(ChildObjectDefintion.uuid == uuid).delete(synchronize_session='fetch')
+      self.do_commit(commit)
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'Child or Object not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)

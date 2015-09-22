@@ -28,7 +28,7 @@ __license__ = 'GPL v3+'
 
 class Sighting(Entity, Base):
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
-  timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'seconds')
+  timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'second')
   description = relationship('StructuredText', secondary=_REL_SIGHTING_STRUCTUREDTEXT, uselist=False)
   confidence = relationship(Confidence, secondary=_REL_SIGHTING_CONFIDENCE, uselist=False)
   # type reference = anyURI

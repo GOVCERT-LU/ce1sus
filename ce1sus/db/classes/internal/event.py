@@ -188,8 +188,11 @@ class Event(Entity, Base):
     # TODO validation of an event
     return True
 
+  def get_populated(self, cache_object):
+    return self.get_instance([Event.stix_header], cache_object)
+
   def to_dict(self, cache_object):
-    instance = self.get_instance([Event.stix_header], cache_object)
+    instance = self.get_populated(cache_object)
 
     if cache_object.permission_controller.is_instance_owner(self, cache_object):
       comments = instance.attributelist_to_dict('comments', cache_object)

@@ -8,7 +8,7 @@ Created on Nov 3, 2014
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
-from ce1sus.db.classes.internal.definitions import ObjectDefinition
+from ce1sus.db.classes.internal.definitions import ObjectDefinition, ChildObjectDefintion
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 
 
@@ -42,7 +42,7 @@ class AdminObjectHandler(RestBaseHandler):
           definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
           if len(path) > 0:
             type_ = uuid = path.pop(0)
-            if type_ == 'attributes':
+            if type_ == 'attribute':
               if len(path) > 0:
                 raise RestHandlerException(u'Use the attribute api instead')
               else:
@@ -82,6 +82,25 @@ class AdminObjectHandler(RestBaseHandler):
                 return 'OK'
               else:
                 raise RestHandlerException(u'No id was specified in the json post')
+            elif type_ == 'object':
+              if isinstance(json, list):
+                # TODO: add support for lists
+                raise RestHandlerException(u'POST of object objects does not support lists')
+
+              child_def = json.get('definition', None)
+              if child_def:
+                uuid = child_def.get('identifier', None)
+                if uuid:
+                  if uuid == definition.uuid:
+                    raise RestHandlerException('Cannot add definition to child')
+                  child_object = self.assembler.assemble(json, ChildObjectDefintion, definition, cache_object)
+                  definition.objects.append(child_object)
+                  self.object_definition_controller.update_object_definition(definition)
+                  return 'OK'
+                else:
+                  raise RestHandlerException(u'No id was specified in the definition of the json post')
+              else:
+                raise RestHandlerException(u'No definition was specified in the json post')
             else:
               raise RestHandlerException(u'"{0}" is not supported'.format(type_))
           else:
@@ -99,9 +118,19 @@ class AdminObjectHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           obj_def = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
-          self.updater.update(obj_def, json, cache_object)
-          # set the new checksum
-          self.object_definition_controller.update_object_definition(obj_def, self.get_user())
+          if len(path) > 0:
+            type_ = path.pop(0)
+            if len(path) > 0:
+              uuid = path.pop(0)
+              child = self.object_definition_controller.get_child_object_definitions_by_uuid(uuid)
+              self.updater.update(child, json, cache_object)
+              self.object_definition_controller.update_child_object_definition(obj_def, child)
+            else:
+              raise RestHandlerException(u'No uuid given')
+          else:
+            self.updater.update(obj_def, json, cache_object)
+            # set the new checksum
+            self.object_definition_controller.update_object_definition(obj_def)
           return obj_def.to_dict(cache_object)
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')
@@ -114,12 +143,17 @@ class AdminObjectHandler(RestBaseHandler):
           uuid = path.pop(0)
           if len(path) > 0:
             type_ = path.pop(0)
-            if len(path) > 0:
+            if type_ == 'attribute':
               definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
               uuid = path.pop(0)
               attr = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
               definition.attributes.remove(attr)
-              self.object_definition_controller.update_object_definition(definition, self.get_user())
+              self.object_definition_controller.update_object_definition(definition)
+            elif type_ == 'object':
+              definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
+              uuid = path.pop(0)
+              self.object_definition_controller.remove_child_object_definitions_by_uuid(uuid)
+
             else:
               raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
           else:

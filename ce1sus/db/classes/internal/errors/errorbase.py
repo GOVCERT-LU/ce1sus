@@ -60,7 +60,7 @@ class ErrorObservable(ErrorBase, Base):
 
   def to_dict(self, cache_object):
     if cache_object.permission_controller.is_instance_owner(self, cache_object):
-      result = {'indicator_id': self.convert_value(self.indicator_id)
+      result = {'indicator_id': self.convert_value(self.indicator.uuid)
                 }
       parent_dict = ErrorBase.to_dict(self, cache_object)
       return merge_dictionaries(result, parent_dict)
@@ -77,7 +77,7 @@ class ErrorObject(ErrorBase, Base):
 
   def to_dict(self, cache_object):
     if cache_object.permission_controller.is_instance_owner(self, cache_object):
-      result = {'observable_id': self.convert_value(self.observable_id)
+      result = {'observable_id': self.convert_value(self.observable.uuid)
                 }
       parent_dict = ErrorBase.to_dict(self, cache_object)
       return merge_dictionaries(result, parent_dict)
@@ -95,7 +95,7 @@ class ErrorAttribute(ErrorBase, Base):
 
   def to_dict(self, cache_object):
     if cache_object.permission_controller.is_instance_owner(self, cache_object):
-      result = {'object_id': self.convert_value(self.object_id)
+      result = {'object_id': self.convert_value(self.object.uuid)
                 }
       parent_dict = ErrorBase.to_dict(self, cache_object)
       return merge_dictionaries(result, parent_dict)
@@ -109,11 +109,11 @@ class ErrorReference(ErrorBase, Base):
   report_id = Column('report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   report = relationship(Report, uselist=False)
 
-  __mapper_args__ = {'polymorphic_identity':'errorattribute'}
+  __mapper_args__ = {'polymorphic_identity':'errorreference'}
 
   def to_dict(self, cache_object):
     if cache_object.permission_controller.is_instance_owner(self, cache_object):
-      result = {'report_id': self.convert_value(self.report_id)
+      result = {'report_id': self.convert_value(self.report.uuid)
                 }
       parent_dict = ErrorBase.to_dict(self, cache_object)
       return merge_dictionaries(result, parent_dict)

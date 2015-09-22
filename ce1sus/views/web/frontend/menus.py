@@ -170,6 +170,31 @@ class GuiMenus(BaseView):
           menus.append(menu_item)
 
       menu_item = dict()
+      menu_item['icon'] = 'fa-user'
+      menu_item['title'] = 'User'
+
+      child_menus = list()
+
+      child_menu_item = dict()
+      child_menu_item['title'] = 'Profile'
+      child_menu_item['section'] = 'user/profile'
+      child_menus.append(child_menu_item)
+
+      if user.permissions.manage_group:
+        child_menu_item = dict()
+        child_menu_item['divider'] = True
+        child_menus.append(child_menu_item)
+
+        child_menu_item = dict()
+        child_menu_item['title'] = 'Group Mgt'
+        child_menu_item['section'] = 'user/group'
+        child_menus.append(child_menu_item)
+
+      menu_item['submenus'] = child_menus
+
+      menus.append(menu_item)
+
+      menu_item = dict()
       menu_item['icon'] = 'fa-question'
       menu_item['title'] = 'Help'
 

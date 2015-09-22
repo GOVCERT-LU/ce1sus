@@ -162,8 +162,12 @@ class Attribute(BaseElement, Base):
         return False
     return ObjectValidator.isObjectValid(self)
 
+  def get_populated(self, cache_object):
+    return self.get_instance([Attribute.definition, Attribute.condition, Attribute.value_base], cache_object)
+
+
   def to_dict(self, cache_object):
-    instance = self.get_instance([Attribute.definition], cache_object)
+    instance = self.get_populated(cache_object)
     
     condition = None
     condition_id = None

@@ -59,14 +59,16 @@ class Identity(Entity, Base):
   related_identities = relationship('RelatedIdentity', secondary=_REL_IDENTITY_RELATED_IDENTITY)
 
 
+  def get_populated(self, cache_object):
+    return self.get_instance([Identity.name, Identity.related_identities], cache_object)
 
   def to_dict(self, cache_object):
-
+    instance = self.get_populated(cache_object)
     result = {
-              'id_': self.convert_value(self.id_),
-              'idref': self.convert_value(self.idref),
-              'name': self.convert_value(self.name),
-              'related_identities': self.attributelist_to_dict('related_identities', cache_object)
+              'id_': instance.convert_value(instance.id_),
+              'idref': instance.convert_value(instance.idref),
+              'name': instance.convert_value(instance.name),
+              'related_identities': instance.attributelist_to_dict('related_identities', cache_object)
             }
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

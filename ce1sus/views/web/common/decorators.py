@@ -79,6 +79,25 @@ def privileged():
       return False
   return check
 
+def groupmanager():
+  """
+  Condition that verifies if the user has the privileged right set
+
+  Note: Should only be used as condition for the require decorator
+  """
+  def check():
+    """
+      Checks if the user has the privileged right
+    """
+    # should not be done like this :P
+    session = getattr(cherrypy, 'session')
+    user = session.get(SESSION_USER, None)
+    if user:
+      return user.permissions.manage_group
+    else:
+      return False
+  return check
+
 
 def validate():
   def check():

@@ -10,6 +10,7 @@ from ce1sus.helpers.common.objects import get_class
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator, FailedValidation
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.sql.schema import UniqueConstraint
 from sqlalchemy.types import Integer, Boolean
 
 from ce1sus.common import merge_dictionaries
@@ -18,9 +19,9 @@ from ce1sus.db.classes.internal.backend.types import AttributeType
 from ce1sus.db.classes.internal.common import ValueTable
 from ce1sus.db.classes.internal.core import SimpleLoggingInformations
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType, BaseObject
+from ce1sus.db.classes.internal.relations import _REL_OBJECT_ATTRIBUTE_DEFINITION
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
-from ce1sus.db.classes.internal.relations import _REL_OBJECT_ATTRIBUTE_DEFINITION
 
 
 __author__ = 'Weber Jean-Paul'
@@ -36,6 +37,26 @@ class DefinitionException(Exception):
 class AttributeDefinitionException(DefinitionException):
   pass
 
+class ChildObjectDefintion(SimpleLoggingInformations, Base):
+
+  parent_id = Column('parent_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+  list_type = Column('list_type', Boolean, nullable=False, default=False)
+  child_id = Column('child_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+  definition = relationship('ObjectDefinition', primaryjoin='ChildObjectDefintion.child_id==ObjectDefinition.identifier')
+  UniqueConstraint('parent_id', 'child_id')
+
+  def validate(self):
+    return True
+
+  def to_dict(self, cache_object):
+    instance = self.get_populated(cache_object)
+    result = {
+            'options': {'list_type': instance.convert_value(instance.list_type)},
+            'definition': instance.attribute_to_dict(instance.definition, cache_object),
+            }
+
+    parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
+    return merge_dictionaries(result, parent_dict)
 
 class ObjectDefinition(SimpleLoggingInformations, Base):
 
@@ -48,6 +69,7 @@ class ObjectDefinition(SimpleLoggingInformations, Base):
   attributes = relationship('AttributeDefinition',
                             secondary=_REL_OBJECT_ATTRIBUTE_DEFINITION,
                             order_by='AttributeDefinition.name')
+  objects = relationship('ChildObjectDefintion', primaryjoin='ObjectDefinition.identifier==ChildObjectDefintion.parent_id')
   cybox_std = Column('cybox_std', Boolean, default=False)
 
   def validate(self):
@@ -71,7 +93,7 @@ class ObjectDefinition(SimpleLoggingInformations, Base):
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, cache_object):
-    instance = self.get_instance([], cache_object)
+    instance = self.get_populated(cache_object)
 
     if cache_object.complete:
       result = {
@@ -80,7 +102,8 @@ class ObjectDefinition(SimpleLoggingInformations, Base):
               'chksum': instance.convert_value(instance.chksum),
               'default_share': instance.convert_value(instance.default_share),
               'attributes': instance.attributelist_to_dict('attributes', cache_object),
-              'cybox_std': instance.convert_value(instance.cybox_std)
+              'cybox_std': instance.convert_value(instance.cybox_std),
+              'objects': instance.attributelist_to_dict('objects', cache_object),
               }
     else:
       result = {
@@ -177,7 +200,7 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
 
 
   def to_dict(self, cache_object):
-    instance = self.get_instance([], cache_object)
+    instance = self.get_populated(cache_object)
     value_type_uuid = None
     value_type_name = None
     if instance.value_type:

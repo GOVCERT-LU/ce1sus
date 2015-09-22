@@ -30,6 +30,8 @@ NOT_MAPPED = [
               'File_HashList_sha384',
               'File_HashList_sha512',
               'File_Hash_HashName_xsi_type',
+              'File_Hash_HexBinary_value',
+              'File_Hash_HashName_value'
               ]
 
 #Don't know how to map these yet
@@ -141,9 +143,16 @@ class CyboxConverter(BaseController):
     else:
       name = properties.__class__.__name__
 
-    for field in get_fields(properties):
+    fields = get_fields(properties)
+    if not 'value' in fields:
+      fields.append('value')
+
+    for field in fields:
       if not field.isupper() and field != 'condition':
-        value = getattr(properties, field)
+        if hasattr(properties, field):
+          value = getattr(properties, field)
+        else:
+          value = None
         if value:
           if isinstance(value, cybox.common.properties.String):
             definition = self.get_attribute_definition(field, name, cache_object)
@@ -155,6 +164,12 @@ class CyboxConverter(BaseController):
               self.map_attribtues(item, cache_object, parent, name_prefix=name)
           elif isinstance(value, cybox.Entity):
             self.map_attribtues(value, cache_object, parent, name_prefix=name)
+          elif isinstance(value, list):
+            for item in value:
+              definition = self.get_attribute_definition(field, name, cache_object)
+              if definition:
+                attribute = self.map_attribute(definition, '{0}'.format(item), parent, cache_object)
+                parent.attributes.append(attribute)
           else:
             definition = self.get_attribute_definition(field, name, cache_object)
             if definition:

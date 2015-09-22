@@ -48,6 +48,15 @@ class ObjectDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def remove_child_object_definitions_by_uuid(self, uuid, commit=True):
+    try:
+      self.obj_def_broker.remove_child_object_definitions_by_uuid(uuid, False)
+      self.obj_def_broker.do_commit(commit)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_object_definitions_by_id(self, object_id):
     try:
       return self.obj_def_broker.get_by_id(object_id)
@@ -72,6 +81,14 @@ class ObjectDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_child_object_definitions_by_uuid(self, uuid):
+    try:
+      return self.obj_def_broker.get_child_object_definitions_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def insert_object_definition(self, obj, commit=True):
     try:
       self.obj_def_broker.insert(obj, False)
@@ -89,6 +106,18 @@ class ObjectDefinitionController(BaseController):
     try:
       self.obj_def_broker.update(obj, commit)
       return obj
+    except ValidationException as error:
+      message = ObjectValidator.getFirstValidationError(obj)
+      raise ControllerException(u'Could not update object definition due to: {0}'.format(message))
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def update_child_object_definition(self, obj, child, commit=True):
+    if obj.cybox_std:
+      raise ControllerException(u'Could not update object definition as the object is part of the cybox standard')
+    try:
+      self.obj_def_broker.update(child, commit)
+      return child
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(obj)
       raise ControllerException(u'Could not update object definition due to: {0}'.format(message))

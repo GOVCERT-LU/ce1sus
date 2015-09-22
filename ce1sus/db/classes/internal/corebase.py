@@ -125,3 +125,6 @@ class BaseObject(object):
     else:
       instance = self
     return instance
+
+  def get_populated(self, cache_object):
+    return self.get_instance([], cache_object)
