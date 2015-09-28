@@ -32,7 +32,7 @@
     </div>
     <div class="panel-collapse collapse" bs-collapse-target>
       <div class="collapse-body" style="padding-right:0;padding-left:0;padding-bottom:0">
-        <table ng-if="object.attributes.length > 0" class="table-striped table-bordered table-hover table-condensed">
+        <table ng-if="(object.attributes.length + object.objects.length) > 0" class="table-striped table-bordered table-hover table-condensed">
           <thead>
             <tr>
               <th width="2%">S</th>
@@ -57,6 +57,11 @@
                 <a class="hand" ng-click="showAttributeDetails(attribute)"><span class="glyphicon glyphicon-eye-open"></span></a>
                 <a class="hand" ng-click="editAttribute(attribute)"><span class="glyphicon glyphicon-pencil" ng-show="permissions.modify"></span></a>
                 <a class="hand red" ng-click="removeAttribute(attribute)" ng-show="permissions.delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
+              </td>
+            </tr>
+            <tr ng-repeat="obj in object.objects | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage" >
+              <td colspan="5">
+                <object object="obj" indent="0" permissions="permissions" related="false"></object>
               </td>
             </tr>
           </tbody>

@@ -51,6 +51,7 @@ class BaseChanger(BaseController):
       proposed_uuid = json.get('identifier', None)
       if instance.uuid is None and proposed_uuid:
         instance.uuid = proposed_uuid
+
     if instance.uuid is None:
       instance.uuid = '{0}'.format(uuid.uuid4())
 

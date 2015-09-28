@@ -104,8 +104,18 @@ class PseudoCyboxAssembler(BaseAssembler):
         attributes = json.get('attributes')
         if attributes:
           for attribute in attributes:
-
+              # NOTE do not assign it here as due to the handler it may change
               self.assemble_attribute(obj, attribute, cache_object)
+
+
+        objects = json.get('objects', None)
+        if objects:
+          for cobject in objects:
+            obj_inst = self.assemble_object(obj, cobject, cache_object)
+
+            if obj_inst:
+              obj.objects.append(obj_inst)
+
         return obj
 
   def assemble_related_object(self, obj, json, cache_object):
@@ -295,6 +305,8 @@ class PseudoCyboxAssembler(BaseAssembler):
               raise AssemblerException('Return value of attribute handler {0} is not a list of Observable, RelatedObject or Attribute'.format(returnvalue))
         else:
           raise AssemblerException('No values were returned by handler')
+    else:
+      raise Exception('No definition found')
     if changed_on == 0:
       # return attributes
       return returnvalues

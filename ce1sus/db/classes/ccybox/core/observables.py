@@ -48,7 +48,7 @@ class ObservableComposition(Entity, Base):
   # ce1sus specific
   observable_id = Column('parent_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  observable = relationship('Observable', uselist=False)
+  observable = relationship('Observable', uselist=False, back_populates='observable_composition')
   _PARENTS = ['observable']
 
   @property

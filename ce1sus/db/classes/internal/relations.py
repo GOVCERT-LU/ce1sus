@@ -28,6 +28,12 @@ _REL_EVENT_OBSERVABLE = Table('rel_event_observable', getattr(Base, 'metadata'),
                                     Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                     )
 
+_REL_OBJECT_OBJECT = Table('rel_object_object', getattr(Base, 'metadata'),
+
+                                    Column('parent_id', BigIntegerType, ForeignKey('objects.object_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),
+                                    Column('child_id', BigIntegerType, ForeignKey('objects.object_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
+                                    )
+
 _REL_EVENT_INDICATOR = Table('rel_event_indicator', getattr(Base, 'metadata'),
 
                                     Column('event_id', BigIntegerType, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),

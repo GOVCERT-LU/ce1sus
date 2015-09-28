@@ -23,15 +23,7 @@ __copyright__ = 'Copyright 2013-2015, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 # not mappable items as they are present twice in the object
-NOT_MAPPED = [
-              'File_HashList_md5',
-              'File_HashList_sha1',
-              'File_HashList_sha256',
-              'File_HashList_sha384',
-              'File_HashList_sha512',
-              'File_Hash_HashName_xsi_type',
-              'File_Hash_HexBinary_value',
-              'File_Hash_HashName_value'
+NOT_MAPPED = ['File_hashes',
               ]
 
 #Don't know how to map these yet
@@ -44,7 +36,14 @@ NOT_MAPPED_SUFFIXES = [
                        ]
 
 # if a special mapping is required
-MAPED_ATTRIBUTES = {}
+MAPED_ATTRIBUTES = {
+                    'DomainName_value': 'DomainName_value',
+                    'URI_type_': 'URIType',
+                    'DomainName_type_': 'DomainType',
+                    'Process_name': 'Process_name',
+                    'WinHandle_type_': 'WinHandleType',
+                    'WinHandle_name': 'WinHandle_name',
+                    }
 
 
 class CyboxConverterException(Exception):
@@ -75,7 +74,10 @@ class CyboxConverter(BaseController):
 
   def get_object_definition(self, instance, cache_object):
     try:
-      name = instance.properties.__class__.__name__
+      if hasattr(instance, 'properties'):
+        name = instance.properties.__class__.__name__
+      else:
+        name = instance.__class__.__name__
       definition = cache_object.seen_obj_defs.get(name, None)
       if definition:
         return definition
@@ -97,51 +99,49 @@ class CyboxConverter(BaseController):
       return text
 
   def is_not_mappable(self, identifier):
-    if identifier in NOT_MAPPED:
-      return True
-    else:
-      for item in NOT_MAPPED_SUFFIXES:
-        if identifier.endswith(item):
-          return True
+    for item in NOT_MAPPED_SUFFIXES:
+      if identifier.endswith(item):
+        return True
     return False
     
+  def get_remap(self, name, cybox_sruct):
+    remap = MAPED_ATTRIBUTES.get(cybox_sruct, None)
+    if remap:
+      return remap
+    return name
 
-  def get_attribute_definition(self, name, name_prefix, cache_object):
-    identifier = '{0}_{1}'.format(name_prefix, name)
-    identifier = self.__sanitize(identifier)
-    self.logger.debug('Getting attribute definition for {0}'.format(identifier))
-    remapped_name = MAPED_ATTRIBUTES.get(identifier, None)
-    if self.is_not_mappable(identifier):
+  def get_attribute_definition(self, name, cache_object, cybox_sruct):
+    self.logger.debug('Getting attribute definition for {0}'.format(name))
+    name = self.__sanitize(name)
+    remapped_name = self.get_remap(name, cybox_sruct)
+    if self.is_not_mappable(name):
       return None
-    else:
-      if remapped_name is None:
-        remapped_name = identifier.split('_', 1)[1]
 
-      try:
-        definition = cache_object.seen_attr_defs.get(remapped_name, None)
-        if definition:
-          return definition
-        else:
-          definition = self.attr_def_broker.get_defintion_by_name(remapped_name, lower=True)
-          cache_object.seen_attr_defs[remapped_name] = definition
-          return definition
+    try:
+      definition = cache_object.seen_attr_defs.get(remapped_name, None)
+      if definition:
         return definition
-      except NothingFoundException as error:
-        try:
-          definition = self.attr_def_broker.get_defintion_by_name(identifier, lower=True)
-          cache_object.seen_attr_defs[remapped_name] = definition
-          return definition
-        except NothingFoundException as error:
-          raise ControllerException('Attribute Definition "{0}" or "{1}" cannot be found'.format(identifier, remapped_name))
-      except BrokerException as error:
-        self.logger.error(error)
-        raise ControllerException(error)
+      else:
+        definition = self.attr_def_broker.get_defintion_by_name(remapped_name, lower=True)
+        cache_object.seen_attr_defs[remapped_name] = definition
+        return definition
+      return definition
+    except NothingFoundException as error:
+      raise ControllerException('Attribute Definition "{0}" cannot be found for {1}'.format(remapped_name, cybox_sruct))
+    except BrokerException as error:
+      self.logger.error(error)
+      raise ControllerException(error)
 
-  def map_attribtues(self, properties, cache_object, parent, name_prefix=None):
-    if name_prefix:
-      name = '{0}_{1}'.format(name_prefix, properties.__class__.__name__)
+  def get_cybox_structure(self, field, properties, cybox_struct=None):
+    if cybox_struct:
+      struct = '{0}_{1}'.format(cybox_struct, properties.__class__.__name__)
     else:
-      name = properties.__class__.__name__
+      struct = properties.__class__.__name__
+    struct = '{0}_{1}'.format(struct, field)
+    self.logger.debug('Mapping {0}'.format(struct))
+    return struct
+
+  def map_properties(self, properties, cache_object, parent, cybox_struct=None):
 
     fields = get_fields(properties)
     if not 'value' in fields:
@@ -154,24 +154,31 @@ class CyboxConverter(BaseController):
         else:
           value = None
         if value:
+          int_cybox_struct = self.get_cybox_structure(field, properties, cybox_struct)
+
+          if int_cybox_struct in NOT_MAPPED:
+            continue
+
           if isinstance(value, cybox.common.properties.String):
-            definition = self.get_attribute_definition(field, name, cache_object)
+            definition = self.get_attribute_definition(field, cache_object, int_cybox_struct)
             if definition:
               attribute = self.map_attribute(definition, '{0}'.format(value), parent, cache_object)
               parent.attributes.append(attribute)
           elif isinstance(value, cybox.EntityList):
             for item in value:
-              self.map_attribtues(item, cache_object, parent, name_prefix=name)
+              entity = self.map_entity(item, cache_object, parent, int_cybox_struct)
+              parent.objects.append(entity)
           elif isinstance(value, cybox.Entity):
-            self.map_attribtues(value, cache_object, parent, name_prefix=name)
+            entity = self.map_entity(value, cache_object, parent, int_cybox_struct)
+            parent.objects.append(entity)
           elif isinstance(value, list):
             for item in value:
-              definition = self.get_attribute_definition(field, name, cache_object)
+              definition = self.get_attribute_definition(field, cache_object, int_cybox_struct)
               if definition:
                 attribute = self.map_attribute(definition, '{0}'.format(item), parent, cache_object)
                 parent.attributes.append(attribute)
           else:
-            definition = self.get_attribute_definition(field, name, cache_object)
+            definition = self.get_attribute_definition(field, cache_object, int_cybox_struct)
             if definition:
               attribute = self.map_attribute(definition, value, parent, cache_object)
               parent.attributes.append(attribute)
@@ -207,5 +214,27 @@ class CyboxConverter(BaseController):
     if obj.idref is None:
       definition = self.get_object_definition(instance, cache_object)
       obj.definition = definition
-      self.map_attribtues(instance.properties, cache_object, obj)
+      self.map_properties(instance.properties, cache_object, obj)
+    # TODO: map custom properties
+
     return obj
+
+  def map_entity(self, instance, cache_object, parent, cybox_struct=None):
+    if isinstance(instance, cybox.common.ObjectProperties):
+      # this will get a sub object
+      obj = Object()
+      obj.parent = parent
+      self.set_base(obj, cache_object, parent=parent)
+      obj.id_ = instance.id_
+      if hasattr(instance, 'idref'):
+        obj.idref = instance.idref
+      if obj.idref is None:
+        definition = self.get_object_definition(instance, cache_object)
+        obj.definition = definition
+        self.map_properties(instance, cache_object, obj)
+        return obj
+    else:
+      raise Exception()
+
+
+    pass

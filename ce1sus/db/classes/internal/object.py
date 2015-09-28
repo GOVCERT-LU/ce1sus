@@ -13,11 +13,12 @@ from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.ccybox.common.vocabs import ObjectRelationship
+from ce1sus.db.classes.ccybox.core.relations import _REL_OBSERVABLE_OBJECT
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.internal.core import BaseElement
 from ce1sus.db.classes.internal.corebase import UnicodeType, BigIntegerType
+from ce1sus.db.classes.internal.relations import _REL_OBJECT_OBJECT
 from ce1sus.db.common.session import Base
-from ce1sus.db.classes.ccybox.core.relations import _REL_OBSERVABLE_OBJECT
 
 
 __author__ = 'Weber Jean-Paul'
@@ -47,9 +48,10 @@ class Object(Entity, Base):
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition')
-  observable = relationship('Observable', secondary=_REL_OBSERVABLE_OBJECT, uselist=False)
+  observable = relationship('Observable', secondary=_REL_OBSERVABLE_OBJECT, uselist=False, back_populates='object')
   parent_id = Column('parent_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), index=True)
-  objects = relationship('Object', primaryjoin='Object.parent_id==Object.identifier')
+  db_object = None
+  objects = relationship('Object', primaryjoin='Object.identifier==rel_object_object.c.parent_id', secondaryjoin='Object.identifier==rel_object_object.c.child_id', secondary=_REL_OBJECT_OBJECT)
 
   related_object = relationship('RelatedObject', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
   @property
@@ -65,6 +67,28 @@ class Object(Entity, Base):
   
   _PARENTS = ['observable', 'related_object']
 
+  @property
+  def object(self):
+    return self.db_object[0]
+
+  @object.setter
+  def object(self, value):
+    self.db_object = [value]
+    
+  @property
+  def parent(self):
+    if self.object:
+      return object
+    else:
+      return self.get_parent()
+
+  @parent.setter
+  def parent(self, instance):
+    if isinstance(instance, Object):
+      self.object = instance
+    else:
+      self.set_parent(instance)
+
   def get_populated(self, cache_object):
     return self.get_instance([Object.definition], cache_object)
 
@@ -79,6 +103,7 @@ class Object(Entity, Base):
               'definition': instance.attribute_to_dict(instance.definition, cache_object_defs),
               'attributes': instance.attributelist_to_dict('attributes', cache_object),
               'related_objects': instance.attributelist_to_dict('related_objects', cache_object),
+              'objects': instance.attributelist_to_dict('objects', cache_object),
               }
     else:
       result = {

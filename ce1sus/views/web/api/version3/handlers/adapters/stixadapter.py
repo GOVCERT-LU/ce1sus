@@ -7,6 +7,7 @@ Created on 7 Sep 2015
 """
 from base64 import b64decode
 import cherrypy
+from json import dumps
 
 from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
@@ -68,6 +69,10 @@ class STIXHandler(AdapterHandlerBase):
       cache_object_copy.complete = True
       cache_object_copy.inflated = True
       json_str = event.to_dict(cache_object_copy)
+
+      f = open('/home/jhemp/test.txt', 'w+')
+      f.write(dumps(json_str, sort_keys=True, indent=4, separators=(',', ': ')))
+      f.close()
 
       event = self.assembler.assemble(json_str, Event, None, cache_object)
       try:

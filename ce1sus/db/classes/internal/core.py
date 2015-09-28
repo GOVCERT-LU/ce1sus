@@ -157,6 +157,9 @@ class BaseElement(ExtendedLogingInformations):
 
   @property
   def parent(self):
+    self.get_parent()
+
+  def get_parent(self):
     if self.path and self.path.path:
       parent_table = self.path.parent_table
       for attr_name in self._PARENTS:
@@ -177,8 +180,12 @@ class BaseElement(ExtendedLogingInformations):
       raise ValueError('Parent for {0} {1} cannot be found'.format(self.get_classname(), self.uuid))
     else:
       return None
+
   @parent.setter
   def parent(self, instance):
+    self.set_parent(instance)
+
+  def set_parent(self, instance):
     # TODO: verify if this is feasible for long term (note as there can be more parents)
     instance_classname = instance.get_classname()
     parent_set = False
@@ -191,6 +198,7 @@ class BaseElement(ExtendedLogingInformations):
           break
     if not parent_set:
       raise ValueError('Cannot set instance of class {0} as parent for it in class {1}'.format(instance_classname, self.get_classname()))
+
 
   def delink_parent(self):
     for attr_name in self._PARENTS:

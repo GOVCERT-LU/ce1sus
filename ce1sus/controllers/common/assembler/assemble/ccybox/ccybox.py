@@ -48,15 +48,14 @@ class CyboxAssembler(BaseAssembler):
           if obj_def:
             obj = self.pseudo_assembler.assemble_object(observable, obj, cache_object)
             if obj:
-
               # must be done to prevent multiple entries in the relations table
               observable.object = obj
 
         if not observable.object:
           observable_composition = json.get('observable_composition', None)
           if observable_composition:
-            observable.observable_composition = self.assemble_observable_composition(observable, observable_composition, cache_object)
-
+            composition = self.assemble_observable_composition(observable, observable_composition, cache_object)
+            observable.observable_composition = composition
         observable.sighting_count = json.get('sighting_count', None)
 
         keywords = json.get('keywords', None)

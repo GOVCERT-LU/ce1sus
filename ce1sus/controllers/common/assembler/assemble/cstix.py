@@ -94,7 +94,6 @@ class StixAssembler(BaseAssembler):
         if observables:
           for observable in observables:
             observable = self.cybox_assembler.assemble_observable(indicator, observable, cache_object)
-            observable.indicator = indicator
             if observable:
               indicator.observables.append(observable)
         producer = json.get('producer', None)
