@@ -60,7 +60,7 @@ class Identity(Entity, Base):
 
 
   def get_populated(self, cache_object):
-    return self.get_instance([Identity.name, Identity.related_identities], cache_object)
+    return self.get_instance([Identity.related_identities], cache_object)
 
   def to_dict(self, cache_object):
     instance = self.get_populated(cache_object)

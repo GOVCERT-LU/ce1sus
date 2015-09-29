@@ -55,7 +55,7 @@
           ng-class="{ 'has-error' : addEventForm.status.$invalid && !addEventForm.status.$pristine }">
           <select name="status" class="form-control"
             ng-options="status.name as status.name for status in statuses"
-            ng-model="event.status" required>
+            ng-model="event.status" required ng-change="setModified(event)">
             <option style="display: none" value="" >Select a Status</option>
           </select>
           <p
