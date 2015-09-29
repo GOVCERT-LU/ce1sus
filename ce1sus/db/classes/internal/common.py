@@ -148,11 +148,15 @@ class Risk(StaticBase):
 
 
 class ServerType(StaticBase):
+
+  MISP = 'MISP'
+  CELSUS = 'Ce1sus'
+
   """Static class defining the risk of an event"""
   @classmethod
   def get_dictionary(cls):
-    return {0: u'MISP',
-            1: u'Ce1sus'}
+    return {0: ServerType.MISP,
+            1: ServerType.CELSUS}
 
 
 class Status(StaticBase):

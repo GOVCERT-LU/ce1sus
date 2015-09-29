@@ -377,12 +377,13 @@ class EventHandler(RestBaseHandler):
         type_ = ProcessType.PUBLISH_UPDATE
       servers = self.server_controller.get_all_push_servers()
       for server in servers:
-        if self.is_event_viewable(event, server.user):
+        cache_object.user = server.user
+        if self.permission_controller.is_instance_viewable(event, cache_object):
           self.process_controller.create_new_process(type_, event.uuid, cache_object.user, server, False)
       # add also mail
       self.process_controller.create_new_process(type_, event.uuid, cache_object.user, None, False)
       self.process_controller.process_broker.do_commit(True)
-
+      cache_object.user = self.get_user()
       return 'Published event.'
     else:
       raise RestHandlerException('Method is undefined.')

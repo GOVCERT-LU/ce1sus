@@ -7,6 +7,7 @@ Created on Nov 8, 2014
 """
 
 from datetime import datetime
+from uuid import uuid4
 
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
@@ -47,6 +48,7 @@ class ProcessController(BaseController):
       # if syncserver is none then it is for all the known servers
       user = self.user_controller.get_user_by_id(user.identifier)
       process_item = ProcessItem()
+      process_item.uuid = '{0}'.format(uuid4())
       if type_ in ProcessType.TYPES:
         process_item.type_ = type_
       else:

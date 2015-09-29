@@ -266,7 +266,7 @@ class EventController(BaseController):
 
   def get_event_group_permissions(self, event, group):
     try:
-      if group.identifier == event.originating_group_id:
+      if group.identifier == event.creator_group_id or group.name == event.stix_header.information_source.identity.name:
         permissions = EventPermissions('0')
         permissions.set_all()
         return permissions

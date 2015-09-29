@@ -8,6 +8,7 @@ Created on Feb 23, 2014
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 import re
 
+from ce1sus.common.classes.cacheobject import CacheObject
 from ce1sus.common.utils import get_max_tlp
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.common.path import PathController
@@ -15,6 +16,7 @@ from ce1sus.controllers.common.permissions import PermissionController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.brokers.mailtemplate import MailTemplateBroker
+from ce1sus.db.classes.internal.usrmgt.user import User
 from ce1sus.db.common.broker import BrokerException, ValidationException, NothingFoundException
 from ce1sus.helpers.common.mailer import Mail, MailerException
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
@@ -120,7 +122,7 @@ class MailController(BaseController):
     text = text.replace(u'${event_id}', u'{0}'.format(event.identifier))
     text = text.replace(u'${event_tlp}', u'{0}'.format(event.tlp))
     text = text.replace(u'${event_risk}', u'{0}'.format(event.risk))
-    text = text.replace(u'${event_title}', u'{0}'.format(event.title))
+    text = text.replace(u'${event_title}', u'{0}'.format(event.stix_header.title))
     return text
 
   def __populate_event_metadata(self, body, event):
@@ -129,41 +131,42 @@ class MailController(BaseController):
     event_url = self.__get_event_url(event)
     text = text.replace(u'${event_url}', u'{0}'.format(event_url))
     text = text.replace(u'${event_created}', u'{0}'.format(event.created_at))
-    text = text.replace(u'${event_reporter}', u'{0}'.format(event.creator_group.name))
+    text = text.replace(u'${event_reporter}', u'{0}'.format(event.stix_header.information_source.identity.name))
     text = text.replace(u'${event_tlp}', u'{0}'.format(event.tlp))
     text = text.replace(u'${event_analysis}', u'{0}'.format(event.analysis))
     text = text.replace(u'${event_risk}', u'{0}'.format(event.risk))
-    text = text.replace(u'${event_title}', u'{0}'.format(event.title))
-    text = text.replace(u'${event_description}', u'{0}'.format(event.description))
+    text = text.replace(u'${event_title}', u'{0}'.format(event.stix_header.title))
+    text = text.replace(u'${event_description}', u'{0}'.format(event.stix_header.description.value))
     return text
 
   def __get_attributes(self, event, user, group, update, proposal=False):
     try:
-      flat_attributes = self.path_controller.get_flat_attributes(event, None, False)
-      # return only visible attribtues
-      event_permissions = None
+      cache_object = CacheObject()
       if user:
-        event_permissions = self.event_broker.get_event_user_permissions(event, user)
+        cache_object.user = user
       if group:
-        event_permissions = self.event_broker.get_event_group_permissions(event, group)
-      if event_permissions:
-        result = ''
-        for attribute in flat_attributes:
-          if self.permission_controller.is_instance_viewable(attribute, None):
-            if update:
-              if attribute.created_at <= event.last_publish_date:
-                                # skip the ones we are not intreseted
-                continue
-              if proposal:
-                if not attribute.properties.is_proposal:
-                  continue
+        cache_object.user = User()
+        cache_object.user.group = group
 
-            if attribute.is_ioc:
-              text = u'{0}/{1}: {2} - IOC'.format(attribute.object.definition.name, attribute.definition.name, attribute.value)
-            else:
-              text = u'{0}/{1}: {2}'.format(attribute.object.definition.name, attribute.definition.name, attribute.value)
-            result = result + text + '\n'
-        return result
+      flat_attributes = self.path_controller.get_flat_attributes(event, cache_object)
+
+      result = ''
+      for attribute in flat_attributes:
+        if update:
+          if attribute.created_at <= event.last_publish_date:
+                            # skip the ones we are not intreseted
+            continue
+
+        if proposal:
+          if not attribute.properties.is_proposal:
+            continue
+
+        if attribute.is_ioc:
+          text = u'{0}/{1}: {2} - IOC'.format(attribute.object.definition.name, attribute.definition.name, attribute.value)
+        else:
+          text = u'{0}/{1}: {2}'.format(attribute.object.definition.name, attribute.definition.name, attribute.value)
+        result = result + text + '\n'
+      return result
     except BrokerException as error:
       raise MailerException(error)
 

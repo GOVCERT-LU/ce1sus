@@ -197,7 +197,7 @@ class Ce1susAdapter(BaseController):
   def update_event(self, event, complete=False, inflated=False):
     url = '/event/{0}'.format(event.uuid)
     url = self.__set_complete_inflated(url, complete, inflated)
-    event_permissions = self.event_controller.get_event_user_permissions(event, self.server_details.user)
+    event_permissions = self.event_controller.get_event_group_permissions(event, self.server_details.user.group)
     json = self.__request(url,
                           'PUT',
                           data=event.to_dict(True, True, event_permissions, self.server_details.user))

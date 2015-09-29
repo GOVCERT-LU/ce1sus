@@ -1245,7 +1245,7 @@ app.directive("objectAttributeForm", function() {
       };
       $scope.definitions =[];
 
-      Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (definitions) {
+      Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attribute",{"complete": true}).then(function (definitions) {
         $scope.allDefinitions = definitions;
       }, function(response) {
         handleError(response, messages);
@@ -1279,7 +1279,7 @@ app.directive("objectAttributeForm", function() {
       $scope.$watch('object.definition.identifier', function() {
         
         $scope.definitions =[];
-        Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (definitions) {
+        Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attribute",{"complete": true}).then(function (definitions) {
           $scope.allDefinitions = definitions;
           $scope.setDefinitions();
         }, function(response) {
