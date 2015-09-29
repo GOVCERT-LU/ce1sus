@@ -1144,16 +1144,16 @@ if __name__ == '__main__':
 
 
   migros = Migrator(config)
-  # migros.create_new_tables()
-  # migros.pre_steps()
-  # migros.altering_tables_phase1()
-  # migros.change_value_tables_phase1()
-  # observables, events = None, None
-  # observables, events = migros.merge_data()
-  # migros.merge_remaining(observables, events)
-  # migros.merge_value_data()
-  # migros.change_value_tables_phase2()
-  # migros.altering_tables_phase2()
+  migros.create_new_tables()
+  migros.pre_steps()
+  migros.altering_tables_phase1()
+  migros.change_value_tables_phase1()
+  observables, events = None, None
+  observables, events = migros.merge_data()
+  migros.merge_remaining(observables, events)
+  migros.merge_value_data()
+  migros.change_value_tables_phase2()
+  migros.altering_tables_phase2()
   migros.post_steps()
   migros.close()
 
