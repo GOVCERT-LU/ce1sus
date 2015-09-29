@@ -68,9 +68,6 @@ class OpenIOCHandler(AdapterHandlerBase):
         self.dump_file(filename, data)
 
       xml_string = self.__make_stix_xml_string(filename, xml_string)
-      f = open('/home/jhemp/f.xml', 'w+')
-      f.write(xml_string)
-      f.close()
       event = self.stix_converter.convert_stix_xml_string(xml_string, cache_object)
       cache_object_copy = cache_object.make_copy()
       cache_object_copy.complete = True
