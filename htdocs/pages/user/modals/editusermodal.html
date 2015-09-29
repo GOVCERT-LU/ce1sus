@@ -1,0 +1,114 @@
+
+
+<div class="modal" tabindex="-1" role="dialog" ng-controller="userProfileEditController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="closeModal()">&times;</button>
+          <h4 class="modal-title">Edit User {{user.username}}</h4>
+        </div>
+        <div class="modal-body">
+
+          <form name="addUserForm" class="form-horizontal" role="form" novalidate>
+            <div class="row">
+              <label class="col-lg-3 control-label text-right">Name *</label>
+              <div class="col-lg-9"">
+                <div
+                  ng-class="{ 'has-error' : addUserForm.name.$invalid && !addUserForm.name.$pristine }">
+                  <input class="form-control" name="name" ng-model="user.name"
+                    type="text" required ng-minlength=3 ng-maxlength=255 ng-change="setModified(user)">
+                  <p
+                    ng-show="addUserForm.name.$invalid && !addUserForm.name.$pristine"
+                    class="help-block">Name is required.</p>
+                  <p ng-show="addUserForm.name.$error.minlength"
+                    class="help-block">Name is too short.</p>
+                  <p ng-show="addUserForm.name.$error.maxlength"
+                    class="help-block">Name is too long.</p>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <label class="col-lg-3 control-label text-right">Sirname *</label>
+              <div class="col-lg-9">
+                <div
+                  ng-class="{ 'has-error' : addUserForm.sirname.$invalid && !addUserForm.sirname.$pristine }">
+                  <input class="form-control" name="sirname"
+                    ng-model="user.sirname" type="text" required ng-minlength=3
+                    ng-maxlength=255 ng-change="setModified(user)">
+                  <p
+                    ng-show="addUserForm.sirname.$invalid && !addUserForm.sirname.$pristine"
+                    class="help-block">Sirname is required.</p>
+                  <p ng-show="addUserForm.sirname.$error.minlength"
+                    class="help-block">Sirname is too short.</p>
+                  <p ng-show="addUserForm.sirname.$error.maxlength"
+                    class="help-block">Sirname is too long.</p>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <label class="col-lg-3 control-label text-right">Password</label>
+              <div class="col-lg-9">
+                <div
+                  ng-class="{ 'has-error' : addUserForm.password.$invalid && !addUserForm.password.$pristine }">
+                  <input class="form-control" name="password"
+                    ng-model="user.password" type="text" ng-minlength=8
+                    ng-maxlength=255 ng-change="setModified(user)">
+                  <p ng-show="addUserForm.password.$error.minlength"
+                    class="help-block">Password is too short.</p>
+                  <p ng-show="addUserForm.password.$error.maxlength"
+                    class="help-block">Password is too long.</p>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <label class="col-lg-3 control-label text-right">Email *</label>
+              <div class="col-lg-9">
+                <div
+                  ng-class="{ 'has-error' : addUserForm.email.$invalid && !addUserForm.email.$pristine }">
+                  <input class="form-control" name="email" ng-model="user.email"
+                    type="email" required ng-minlength=3 ng-maxlength=255
+                    ng-pattern="/^.+@.+\..{2,3}$/" ng-change="setModified(user)">
+                  <p
+                    ng-show="addUserForm.email.$invalid && !addUserForm.email.$pristine"
+                    class="help-block">Email is required.</p>
+                  <p ng-show="addUserForm.email.$error.pattern" class="help-block">Email
+                    is not valid email.</p>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <label class="col-lg-3 control-label text-right">Get notifications</label>
+              <div class="col-lg-9">
+                  <input class="form-control" type="checkbox" name="notifications" value="notifications"  ng-model="user.notifications" />
+              </div>
+            </div>
+            
+            
+            <div class="row">
+              <label class="col-lg-3 control-label text-right">GPG Key</label>
+              <div class="col-lg-9">
+                <textarea name="gpg_key" ng-model="user.gpg_key" cols=48 rows=20 ng-change="setModified(user)"></textarea>
+              </div>
+            </div>
+
+
+          </form>
+
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary"
+              ng-disabled="!userChanged() || addUserForm.$invalid"
+              ng-click="submitUser()">Save</button>
+            <button name="reset" type="button" class="btn btn-default"
+              ng-click="resetUser()">Reset</button>
+            <button type="button" class="btn btn-default"
+              ng-click="closeModal()">Close</button>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+</div>

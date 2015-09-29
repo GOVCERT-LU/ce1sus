@@ -9,7 +9,7 @@ import random
 
 from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.admin.user import UserController
-from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException, NotImplementedException
 from ce1sus.db.classes.internal.usrmgt.user import User
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
@@ -158,23 +158,37 @@ class AdminUserHandler(RestBaseHandler):
   @require()
   def profile(self, **args):
     method = args.get('method')
-    path = args.get('path')
     json = args.get('json')
     cache_object = self.get_cache_object(args)
     if method == 'GET':
-      return self.get_user().to_dict(cache_object)
+      user = self.get_user()
+      user.password = ''
+      return user.to_dict(cache_object)
     elif method == 'PUT':
-      pass
+      user = self.get_user()
+      self.logger.info('User {0} changes his profile'.format(user.username))
+      # Note this has to be done on a custom basis
+      user = self.user_controller.get_user_by_id(user.identifier)
+      user.name = json['name']
+      user.sirname = json['sirname']
+      # check if pwd has changed
+      pwd = json.get('password', None)
+      if pwd:
+        salt = self.config.get('ce1sus', 'salt', None)
+        if salt:
+          user.password = hashSHA1(user.plain_password + salt)
+        else:
+          raise ControllerException('Salt was not defined in ce1sus.conf')
+      user.email = json['email']
+      user.notifications = json['notifications']
+      # TODO: import gpg key
+      user.gpg_key = json['gpg_key']
+      self.user_controller.update_user(user)
+      user.password = ''
+      return user.to_dict(cache_object)
 
   @rest_method()
   @methods(allowed=['GET', 'PUT'])
   @require(groupmanager())
   def group(self, **args):
-    method = args.get('method')
-    path = args.get('path')
-    json = args.get('json')
-    cache_object = self.get_cache_object(args)
-    if method == 'GET':
-      pass
-    elif method == 'PUT':
-      pass
+    raise NotImplementedException('Group managment is not implemented')

@@ -17,6 +17,8 @@ Release 0.11.1
 * Small improvements in GUI 
 * Deprecated 0.10.X
 * User Profile and Group managment for user with the permission to administer it's own group
+* More Cybox definitions
+* Objects can contain sub objects
 
 Release 0.11.0
 --------------

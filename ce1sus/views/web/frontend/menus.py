@@ -216,11 +216,13 @@ class GuiMenus(BaseView):
       menu_item['submenus'] = child_menus
       menus.append(menu_item)
 
-      menu_item = dict()
-      menu_item['icon'] = 'fa-lock'
-      menu_item['title'] = 'Logout'
-      menu_item['section'] = 'main.layout.logout'
-      menus.append(menu_item)
+      do_basicauth = self.config.get('ce1sus', 'usebasicauth', False)
+      if not do_basicauth:
+        menu_item = dict()
+        menu_item['icon'] = 'fa-lock'
+        menu_item['title'] = 'Logout'
+        menu_item['section'] = 'main.layout.logout'
+        menus.append(menu_item)
 
     else:
       menu_item = dict()

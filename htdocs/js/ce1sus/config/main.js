@@ -1126,7 +1126,6 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  },
                                  users: function(Restangular,$routeSegment) {
                                    return Restangular.one("user").getList(null, {"complete": false}).then(function (users) {
-                                     alert(users);
                                      return users;
                                    
                                    }, function(response) {

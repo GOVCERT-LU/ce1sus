@@ -468,10 +468,6 @@ app.directive("composedobservable", function($compile) {
       $scope.editComposedObservable = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/composededit.html', show: true});
       };
-      
-      $scope.addChildObservable = function(){
-        alert('Hello');
-      };
 
       $scope.setModified = setModified;
 
