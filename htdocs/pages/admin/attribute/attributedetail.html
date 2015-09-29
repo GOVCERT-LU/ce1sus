@@ -46,11 +46,19 @@
   <label class="col-lg-3 control-label text-right">Options</label>
   <div class="col-lg-9">
     <div class="row">
-      <label class="col-lg-3 control-label text-right">Relationable:</label>
+      <label class="col-lg-3 control-label text-right">Create Relations:</label>
       <div class="col-lg-9">
         <input class="form-control" type="checkbox"
           name="selectedOptions[]" value="relationable"
           ng-model="attribute.relation" disabled/>
+      </div>
+    </div>
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Relations are case insensitive:</label>
+      <div class="col-lg-9">
+        <input class="form-control" type="checkbox"
+          name="selectedOptions[]" value="case_insensitive"
+          ng-model="attribute.case_insensitive" disabled/>
       </div>
     </div>
     <div class="row">

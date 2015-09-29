@@ -46,8 +46,8 @@ class SearchHandler(RestBaseHandler):
           operator = json.get('operator', None)
           if operator in ['<', '<=', '==', '>=', '>', 'like']:
             definition_id = json.get('field', None)
-
-            results = self.__prossess_search(needle, operator, definition_id, cache_object)
+            insensitive = json.get('insensitive', False)
+            results = self.__prossess_search(needle, operator, definition_id, insensitive, cache_object)
             self.set_authorized_cache(cache_object.authorized_cache)
             return results
           else:
@@ -142,9 +142,9 @@ class SearchHandler(RestBaseHandler):
     else:
       raise ControllerException('Search output not specified')
 
-  def __prossess_search(self, needle, operator, definition_id, cache_object):
+  def __prossess_search(self, needle, operator, definition_id, insensitive, cache_object):
     """ Note returns only the events which can be viewed """
-    results = self.search_controller.search(needle, operator, definition_id)
+    results = self.search_controller.search(needle, operator, definition_id, insensitive)
     result = list()
     cache_object_copy = cache_object.make_copy()
     cache_object_copy.details = False

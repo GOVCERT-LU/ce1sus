@@ -92,6 +92,8 @@ class Ce1susAssembler(BaseAssembler):
       attr_def.share = json.get('share', False)
       attr_def.regex = json.get('regex', None)
       attr_def.table_id = json.get('table_id', None)
+      attr_def.case_insensitive = json.get('case_insensitive', False)
+
       # The user cannot set this !!
       # attr_def.cybox_std = json.get('cybox_std', False)
       attr_def.cybox_std = False

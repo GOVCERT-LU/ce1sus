@@ -666,6 +666,7 @@ class Migrator(object):
 
     self.__change_column(AttributeDefinition, 'description')
     self.__change_column(AttributeDefinition, 'regex')
+    self.__add_column(AttributeDefinition, 'case_insensitive')
 
     self.__change_column(AttributeHandler, 'description')
 

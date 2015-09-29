@@ -20,6 +20,7 @@
       </select> 
       <input class="form-control" value="" type="text" ng-model="search.value">
       <button id="AddSave" class="btn btn-primary" type="submit" ng-disabled="!searchChanged()" ng-click="submitSearch()">Search</button>
+      <input type="checkbox" ng-model="search.insensitive">Case Insensitive<br>
    </div>
 </div>
 </form>

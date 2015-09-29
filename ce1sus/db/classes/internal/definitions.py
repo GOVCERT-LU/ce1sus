@@ -132,6 +132,7 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
   share = Column('sharable', Boolean, default=False, nullable=False)
   # TODO: make an event on relationable to recreate and remove the relations on change
   relation = Column('relationable', Boolean, default=False, nullable=False)
+  case_insensitive = Column('case_insensitive', Boolean, default=False, nullable=False)
   value_type_id = Column('attributetype_id', BigIntegerType, ForeignKey('attributetypes.attributetype_id'))
   value_type = relationship(AttributeType, uselist=False)
   objects = relationship('ObjectDefinition',

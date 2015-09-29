@@ -67,7 +67,7 @@ class SearchController(BaseController):
 
 
 
-  def search(self, needle, operator, property_name, bypass_validation=False):
+  def search(self, needle, operator, property_name, insensitive, bypass_validation=False):
 
     if not isinstance(needle, list):
       needle = needle.strip()
@@ -79,9 +79,9 @@ class SearchController(BaseController):
 
 
     if property_name is None or property_name == 'Any':
-      found_values = self.serach_for_any_value(needle, operator, bypass_validation)
+      found_values = self.serach_for_any_value(needle, operator, insensitive, bypass_validation)
     elif property_name == 'description':
-      found_values = self.__look_for_descriptions(needle, operator, bypass_validation)
+      found_values = self.__look_for_descriptions(needle, operator, insensitive, bypass_validation)
     else:
       found_values = list()
       found = False
@@ -90,6 +90,7 @@ class SearchController(BaseController):
         res = self.search_broker.look_for_attribute_value(definition,
                                                           needle,
                                                           operator,
+                                                          insensitive,
                                                           bypass_validation)
         if res:
           found_values.extend(res)
@@ -102,6 +103,7 @@ class SearchController(BaseController):
         res = self.search_broker.look_for_reference_value(property_name,
                                                              needle,
                                                              operator,
+                                                             insensitive,
                                                              bypass_validation)
         if res:
           found_values.extend(res)
@@ -112,37 +114,38 @@ class SearchController(BaseController):
 
       if not found:
         # try looking for the corresponding property
-        res = self.search_by_property(property_name, needle, operator, bypass_validation)
+        res = self.search_by_property(property_name, needle, operator, insensitive, bypass_validation)
         if res:
           found_values.extend(res)
 
     return found_values
 
-  def search_by_property(self, property_name, needle, operator, bypass_validation=False):
+  def search_by_property(self, property_name, needle, operator, insensitive, bypass_validation=False):
     found_values = list()
     for clazz in SearchController.SEARCHABLE_CLASSES:
-      found_values.extend(self.search_broker.look_for_value_by_property_name(clazz, property_name, needle, operator, bypass_validation))
+      found_values.extend(self.search_broker.look_for_value_by_property_name(clazz, property_name, needle, operator, insensitive, bypass_validation))
     return found_values
 
-  def serach_for_any_value(self, needle, operator, bypass_validation=False):
-    found_values = self.search_broker.look_for_attribute_value(None, needle, operator, bypass_validation)
+  def serach_for_any_value(self, needle, operator, insensitive, bypass_validation=False):
+    found_values = self.search_broker.look_for_attribute_value(None, needle, operator, insensitive, bypass_validation)
     # Also look inside uuids
 
-    found_values = found_values + self.__look_for_descriptions(needle, operator, bypass_validation)
+    found_values = found_values + self.__look_for_descriptions(needle, operator, insensitive, bypass_validation)
 
     for clazz in SearchController.SEARCHABLE_CLASSES:
-      found_values = found_values + self.search_broker.look_for_value_by_properties(clazz, SearchController.SEARCHABLE_PROPERIES, needle, operator, bypass_validation)
+      found_values = found_values + self.search_broker.look_for_value_by_properties(clazz, SearchController.SEARCHABLE_PROPERIES, needle, operator, insensitive, bypass_validation)
 
     found_values = found_values + self.search_broker.look_for_reference_value(None,
                                                                               needle,
                                                                               operator,
+                                                                              insensitive,
                                                                               bypass_validation)
 
     return found_values
 
-  def __look_for_descriptions(self, value, operand, bypass_validation=False):
+  def __look_for_descriptions(self, value, operand, insensitive, bypass_validation=False):
     found_values = list()
     for clazz in SearchController.SEARCHABLE_CLASSES:
-      result = self.search_broker.look_for_descriptions(clazz, value, operand, bypass_validation)
+      result = self.search_broker.look_for_descriptions(clazz, value, operand, insensitive, bypass_validation)
       found_values = found_values + result
     return found_values

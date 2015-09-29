@@ -24,6 +24,7 @@ class Ce1susMerger(BaseMerger):
       merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'attributehandler_id', merge_cache))
       merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'default_condition_id', merge_cache))
       merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'regex', merge_cache))
+      merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'case_insensitive', merge_cache))
       #table_id cannot change !!!
       merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'relation', merge_cache))
       merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'value_type_id', merge_cache))

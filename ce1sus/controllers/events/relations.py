@@ -12,7 +12,6 @@ from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.common.permissions import PermissionController
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.relationbroker import RelationBroker
-from ce1sus.db.brokers.values import ValueBroker
 from ce1sus.db.classes.internal.backend.relation import Relation
 from ce1sus.db.common.broker import IntegrityException, BrokerException
 from ce1sus.controllers.events.search import SearchController
@@ -33,45 +32,6 @@ class RelationController(BaseController):
     self.relation_broker = self.broker_factory(RelationBroker)
     self.permission_controller = self.controller_factory(PermissionController)
     self.search_controller = self.controller_factory(SearchController)
-
-  def generate_attribute_relations(self, attribute, commit=False):
-    try:
-      """
-
-      Generates the relations for the given attribue
-      :param attribute:
-      :type attribute: Attribute
-      :param commit:
-      :type commit: Boolean
-
-      """
-      if attribute.definition.relation:
-        clazz = ValueBroker.get_class_by_attr_def(attribute.definition)
-        relations = self.__look_for_value_by_attrib_id(clazz,
-                                                       attribute.plain_value,
-                                                       attribute.definition.identifier,
-                                                       '==',
-                                                       True)
-        event = attribute.object.event
-        for relation in relations:
-
-                    # make insert foo
-          if relation.event_id != event.identifier:
-                        # make relation in both ways
-            relation_entry = Relation()
-            relation_entry.uuid = '{0}'.format(uuid.uuid4())
-            relation_entry.event_id = event.identifier
-            relation_entry.rel_event_id = relation.event_id
-            relation_entry.attribute_id = attribute.identifier
-            relation_entry.rel_attribute_id = relation.attribute_id
-            try:
-              self.relation_broker.insert(relation_entry, False)
-            except IntegrityException:
-              # do nothing if duplicate
-              pass
-        self.relation_broker.do_commit(commit)
-    except BrokerException as error:
-      raise ControllerException(error)
 
   def generate_bulk_attributes_relations(self, event, attributes, commit=False):
     # call partitions
@@ -114,7 +74,7 @@ class RelationController(BaseController):
     
     result = list()
     for definition in definitions:
-      result.extend(self.search_controller.search(unique_search_items, 'in', definition.name, True))
+      result.extend(self.search_controller.search(unique_search_items, 'in', definition.name, definition.case_insensitive, True))
     return result
 
   def find_relations_of_array(self, event, definition, search_items, values_attr, commit=False):
