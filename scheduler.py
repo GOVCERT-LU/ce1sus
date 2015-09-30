@@ -10,7 +10,7 @@ from datetime import datetime
 from os.path import dirname, abspath
 
 from ce1sus.common.classes.cacheobject import CacheObject
-from ce1sus.connectors.ce1susconnector import Ce1susConnector, Ce1susConnectorException
+from ce1sus.connectors.ce1susconnector import Ce1susConnector, Ce1susConnectorException, NothingFoundException
 from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.admin.user import UserController
@@ -281,7 +281,7 @@ class Scheduler(object):
       pass
 
 
-  def __publish_event(self, item, event, cache_object, update=False):
+  def __publish_event(self, item, event, cache_object):
     # server publishing
     if item.server_details:
       server_details = item.server_details
@@ -291,10 +291,13 @@ class Scheduler(object):
     if server_details.type == ServerType.MISP:
       self.__push_misp(item, event)
     elif server_details.type == ServerType.CELSUS:
-      if update:
+      #check if it is existing on the given server else insert it
+      try:
+        self.ce1sus_connector.get_event_by_uuid(item.event_uuid, False, False)
         self.__push_ce1sus_update(item, event)
-      else:
+      except NothingFoundException:
         self.__push_ce1sus(item, event)
+        
     else:
       raise SchedulerException('Server type {0} is unknown'.format(server_details.type))
 
@@ -309,7 +312,7 @@ class Scheduler(object):
       try:
         if item.server_details:
           # do the sync only for this server
-          self.__publish_event(item, event, cache_object, update)
+          self.__publish_event(item, event, cache_object)
         else:
           # it is to send mails
           self.__send_mails(event, item.type_, cache_object)
