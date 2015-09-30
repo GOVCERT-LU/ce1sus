@@ -6,7 +6,7 @@
 Created on Aug 26, 2015
 """
 from ce1sus.views.web.api.version3.base import AbstractRestController
-from ce1sus.views.web.api.version3.handlers.adapters.misp import MISPHandler
+from ce1sus.views.web.api.version3.handlers.adapters.mispadapter import MISPHandler
 
 
 __author__ = 'Weber Jean-Paul'

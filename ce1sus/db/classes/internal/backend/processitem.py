@@ -45,14 +45,16 @@ class ProcessStatus(StaticBase):
 class ProcessType(StaticBase):
 
   PULL = u'Pull'
+  PULL_UPDATE = u'Pull Update'
   PUSH = u'Push'
+  PUSH_UPDATE = u'Push Update'
   PUBLISH = u'Publish'
   PUBLISH_UPDATE = u'Publish Update'
   RELATIONS = u'Relations'
   PROPOSAL = u'Proposal'
   REPUBLISH = u'RePublish'
   REPUBLISH_UPDATE = u'RePublish Update'
-  TYPES = [PULL, PUSH, PUBLISH, PUBLISH_UPDATE, RELATIONS, PROPOSAL, REPUBLISH, REPUBLISH_UPDATE]
+  TYPES = [PULL, PULL_UPDATE, PUSH, PUBLISH, PUBLISH_UPDATE, RELATIONS, PROPOSAL, REPUBLISH, REPUBLISH_UPDATE]
 
   @classmethod
   def get_dictionary(cls):

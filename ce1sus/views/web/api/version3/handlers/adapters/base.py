@@ -5,7 +5,8 @@
 
 Created on 7 Sep 2015
 """
-from ce1sus.helpers.common.config import ConfigSectionNotFoundException, Configuration
+
+from ce1sus.helpers.common.config import Configuration, ConfigSectionNotFoundException
 from datetime import datetime
 from os import makedirs, remove
 from os.path import dirname, abspath, isdir, isfile
@@ -21,6 +22,9 @@ __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2015, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
+
+class AdapterHandlerException(HandlerException):
+  pass
 
 
 class AdapterHandlerBase(RestBaseHandler):

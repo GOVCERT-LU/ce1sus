@@ -38,9 +38,9 @@ class ProcessController(BaseController):
   def set_simple_logging(self, process_item, user, insert):
     if insert:
       process_item.created_at = datetime.utcnow()
-      process_item.creator = user
+      process_item.creator_id = user.identifier
     process_item.modified_on = datetime.utcnow()
-    process_item.modifier = user
+    process_item.modifier_id = user.identifier
 
 
   def create_new_process(self, type_, event_uuid, user, sync_server=None, commit=False):

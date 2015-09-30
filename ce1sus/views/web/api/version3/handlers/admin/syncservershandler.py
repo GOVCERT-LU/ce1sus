@@ -8,12 +8,15 @@ Created on Apr 2, 2015
 from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.db.classes.internal.backend.servers import SyncServer
-# from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapter, Ce1susAdapterException
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
+from ce1sus.views.web.api.version3.handlers.adapters.base import AdapterHandlerException
+from ce1sus.views.web.api.version3.handlers.adapters.ce1susadapter import Ce1susHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
+from ce1sus.db.classes.internal.common import ServerType
 
 
+# from ce1sus.views.web.adapters.ce1sus.ce1susadapter import Ce1susAdapter, Ce1susAdapterException
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
@@ -25,6 +28,7 @@ class SyncServerHandler(RestBaseHandler):
   def __init__(self, config):
     super(SyncServerHandler, self).__init__(config)
     self.sync_server_controller = self.controller_factory(SyncServerController)
+    self.ce1sus_adapter = Ce1susHandler(config)
 
     # self.ce1sus_adapter = Ce1susAdapter(config)
 
@@ -84,15 +88,15 @@ class SyncServerHandler(RestBaseHandler):
       if len(path) > 0:
         uuid = path.pop(0)
         server = self.sync_server_controller.get_server_by_uuid(uuid)
-        if server.type == 'MISP':
+        if server.type == ServerType.MISP:
           return self.misp_adapter.push(server)
-        elif server.type == 'Ce1sus':
-          return self.ce1sus_adapter.push(server)
+        elif server.type == ServerType.CELSUS:
+          return self.ce1sus_adapter.push_all(server)
         else:
-          raise RestHandlerException('Not Implemented')
+          raise RestHandlerException('Server type "{0}" is undefined'.format(server.type))
     except ControllerNothingFoundException as error:
       raise RestHandlerNotFoundException(error)
-    except (MISPAdapterException, ControllerException, Ce1susAdapterException) as error:
+    except (AdapterHandlerException, ControllerException) as error:
       raise RestHandlerException(error)
 
   @rest_method(default=True)
@@ -104,13 +108,13 @@ class SyncServerHandler(RestBaseHandler):
       if len(path) > 0:
         uuid = path.pop(0)
         server = self.sync_server_controller.get_server_by_uuid(uuid)
-        if server.type == 'MISP':
+        if server.type == ServerType.MISP:
           return self.misp_adapter.pull(server)
-        elif server.type == 'Ce1sus':
-          return self.ce1sus_adapter.pull(server)
+        elif server.type == ServerType.CELSUS:
+          return self.ce1sus_adapter.pull_all(server)
         else:
-          raise RestHandlerException('Not Implemented')
+          raise RestHandlerException('Server type "{0}" is undefined'.format(server.type))
     except ControllerNothingFoundException as error:
       raise RestHandlerNotFoundException(error)
-    except (MISPAdapterException, ControllerException, Ce1susAdapterException) as error:
+    except (AdapterHandlerException, ControllerException) as error:
       raise RestHandlerException(error)
