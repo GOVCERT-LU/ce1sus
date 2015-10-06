@@ -93,8 +93,8 @@ class MispConverter(BaseController):
     timestamp = MispConverter.__get_value(xml_element, 'timestamp')
     uuid = MispConverter.__get_value(xml_element, 'uuid')
     date = MispConverter.__get_value(xml_element, 'date')
-
-    timestamp = datetime.utcfromtimestamp(int(timestamp))
+    if timestamp:
+      timestamp = datetime.utcfromtimestamp(int(timestamp))
     tlp = get_tlp(distribution)
 
     if not date:

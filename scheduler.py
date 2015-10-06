@@ -6,6 +6,7 @@
 Created on Apr 16, 2015
 """
 from ce1sus.helpers.common.config import Configuration
+from ce1sus.helpers.common.objects import get_fields
 from datetime import datetime
 from os.path import dirname, abspath
 
@@ -23,6 +24,7 @@ from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.classes.cstix.extensions.test_mechanism.generic_test_mechanism import GenericTestMechanism
 from ce1sus.db.classes.internal.backend.processitem import ProcessType
 from ce1sus.db.classes.internal.common import ServerType
+from ce1sus.db.classes.internal.core import BaseElement
 from ce1sus.db.classes.internal.usrmgt.user import User
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
@@ -83,10 +85,20 @@ class Scheduler(object):
       raise SchedulerException(error)
     
   
+  def __invalidate_instance(self, instance):
+    if isinstance(instance, BaseElement):
+      instance.properties.is_validated = False
+
+      for field in get_fields(instance):
+        if field not in instance._PARENTS:
+          self.__invalidate_instance(getattr(instance, field))
+
   def __push_ce1sus(self, item, event):
     try:
       self.ce1sus_connector.server_details = item.server_details
       self.ce1sus_connector.login()
+      # TODO: invalidate the whole event
+      self.__invalidate_instance(event)
       self.ce1sus_connector.insert_event(event)
       self.ce1sus_connector.logout()
       self.process_controller.process_finished_success(item, self.user)
@@ -359,10 +371,10 @@ class Scheduler(object):
           self.__pull(item, True)
 
         elif item.type_ == ProcessType.PUSH:
-          self.__push(item, False)
+          self.__push(item)
 
         elif item.type_ == ProcessType.PUSH_UPDATE:
-          self.__push(item, True)
+          self.__push(item)
 
         elif item.type_ == ProcessType.RELATIONS:
           raise SchedulerException('Not Implemented')
