@@ -16,26 +16,39 @@ server {
         ssl_session_cache shared:SSL:10m;
         ssl_session_timeout 5m;
 
-        location /css {
-          root /path/to/ce1sus/ce1sus/htdocs;
-        }
+        location = / { 
+          root /path/to/ce1sus/ce1sus/htdocs; 
+        } 
 
-        location /images {
-          root /path/to/ce1sus/ce1sus/htdocs;
-        }
-
-        location /img {
-          root /path/to/ce1sus/ce1sus/htdocs;
-        }
+        location = /index.html { 
+          root /path/to/ce1sus/ce1sus/htdocs; 
+        } 
 
         location /js {
           root /path/to/ce1sus/ce1sus/htdocs;
         }
+
+        location /css {
+          root /path/to/ce1sus/ce1sus/htdocs;
+        }
+        
+        location /fonts { 
+          root /path/to/ce1sus/ce1sus/htdocs; 
+        } 
+       
+        location /images {
+          root /path/to/ce1sus/ce1sus/htdocs;
+        }
+
+        location /pages { 
+          root /path/to/ce1sus/ce1sus/htdocs; 
+        } 
 
         location / {
           uwsgi_pass unix:/run/uwsgi/app/ce1sus/socket;
           include uwsgi_params;
           uwsgi_param SCRIPT_NAME "";
           uwsgi_param HTTPS on;
+          uwsgi_read_timeout 1200; 
         }
       }

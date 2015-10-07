@@ -1,0 +1,13 @@
+[MISPMapper]
+dump=yes
+path=mispdump
+transformergroup=fa2924e9-67c0-4f13-a7d2-d66cb499677e
+
+[STIXMapper]
+dump=yes
+path=stixdump
+
+[OpenIOCMapper]
+dump=yes
+path=openiocdump
+transformergroup=fa2924e9-67c0-4f13-a7d2-d66cb499677e

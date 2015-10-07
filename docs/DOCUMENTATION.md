@@ -23,6 +23,7 @@ Ce1sus need the following packages:
   * gnupg (0.3.5+)
   * eml_parser
   * requests(2.4.3+)
+  * lxml
 - mysql (5.1+)
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)
@@ -36,7 +37,7 @@ Ce1sus need the following packages:
 Debian based systems can execute the following command:
 
 ``` shell
-sudo apt-get install python-requests python-cherrypy3 python-dateutil python-gnupg python-ldap python-memcache python-mysqldb python-sqlalchemy mysql-server python-mako git memcached
+sudo apt-get install python-requests python-cherrypy3 python-dateutil python-gnupg python-ldap python-memcache python-mysqldb python-sqlalchemy mysql-server python-mako git memcached python-lxml python-requests
 ```
 
 ##1.2. Clone the repository
@@ -110,8 +111,7 @@ One possibility to install OpenIOC is the following
 
 ``` shell
 mkdir libs
-mkdir libs
-git -C libs clone https://github.com/STIXProject/openioc-to-stix.git
+git -C libs clone https://github.com/jhemp/openioc-to-stix.git
 ln -s libs/openioc-to-stix/ioc_observable.py .
 ln -s libs/openioc-to-stix/openioc.py .
 ln -s libs/openioc-to-stix/openioc_to_cybox.py .
@@ -222,6 +222,11 @@ The **[ce1sus]** section stores the general settings of ce1sus and has the follo
 |maintenaceuseruuid=               | The user uuid which is used by the maintenance.py script and used for the sync mechanism|
 |usebasicauth=[yes,no]             | enable basic authentication|
 |salt=                             | A random used to salt the hashes of passwords|
+|revdir=                           | Absolute path for storage of of revision files, if the path/file does not exist it will be created |
+|                                  | **Note 1**: Each change will imply a dump of the changed element|
+|                                  | **Note 2**: The file name is defined as follows <Element>-<uuid>-<date>-<time>.json|
+|                                  | **Note 3**: The file is the json of the element so that it can be reinserted.|
+|                                  | **Note 4**: If not set this feature is disabled |
 
 The **[Logger]** section stores the configuration how the logs are stored/processed and has the following elements
 
@@ -229,7 +234,7 @@ The **[Logger]** section stores the configuration how the logs are stored/proces
 |--------------|-------------|
 |log=[Yes,No]                                           | If set ce1sus does log|
 |                                                       |  **Note**: It is advised that this element is set to "yes"|
-|log_file=log/logger.txt                                | Absolute or relative path for storage of log files|
+|log_file=log/logger.txt                                | Absolute path for storage of log files, if the path/file does not exist it will be created|
 |logConsole = [Yes,No]                                  | If set ce1sus logs to the console and the file|
 |level=[CRITICAL,ERROR,WARNING,INFO,DEBUG]              | Log level|
 |size=10000000                                          | Size in bytes of the file before it gets rotated|
@@ -270,21 +275,6 @@ The **[Mailer]** section stores the configuration for sending mails and has the 
 |keylength=1024                                         | Length of the gpg key in case it should be generated automatically|
 |expiredate=[YYYY-MM-DD]                                | Expiry date of the generated key |
 
-The **[MISPAdapter]** section provides you to enable dumping of the gotten Misp events
-
-|variable name | Description |
-|--------------|-------------|
-|dump=[yes,no]           | Enable dumping of misps|
-|file=mispdump           | Absolute path to a folder where the misps should be dumped|
-
-The [OpenIOCAdapter] section provides you to enable dumping of the gotten Misp events
-
-|variable name | Description |
-|--------------|-------------|
-|dump=[yes,no]           | Enable dumping of openIOC xml|
-|file=openiocdump        | Absolute path to a folder where the misps should be dumped|
-
-
 The **[ErrorMails]** section stores the configuration of the error mails. These mails are send in case a HTTP 500 error occurs.
 
 |variable name | Description |
@@ -299,7 +289,32 @@ The **[ErrorMails]** section stores the configuration of the error mails. These 
 |user=                                                  | Not implemented|
 |password                                               ||
 
-###1.4.1b handler.conf
+
+###1.4.1b mappers.conf
+
+The **[MISPAdapter]** section provides you to enable dumping of the gotten Misp events
+
+|variable name | Description |
+|--------------|-------------|
+|dump=[yes,no]           | Enable dumping of misps|
+|file=mispdump           | Absolute path to a folder where the misps should be dumped, if the path/file does not exist it will be created|
+
+The **[OpenIOCAdapter]** section provides you to enable dumping of the gotten OpenIOC files
+
+|variable name | Description |
+|--------------|-------------|
+|dump=[yes,no]           | Enable dumping of openIOC xml|
+|file=openiocdump        | Absolute path to a folder where the files should be dumped, if the path/file does not exist it will be created|
+
+The **[STIXMapper]** section provides you to enable dumping of the gotten STIX data
+
+|variable name | Description |
+|--------------|-------------|
+|dump=[yes,no]           | Enable dumping of STIX xml|
+|file=openiocdump        | Absolute path to a folder where the files should be dumped, if the path/file does not exist it will be created|
+
+
+###1.4.1c handler.conf
 
 Go to your ce1sus installation directory and create configuration file handlers.conf in the config directory 
 use the file *config/handlers.conf_tmpl* as template
@@ -314,7 +329,7 @@ The following sections have to be modified to the settings of your system
 |variable name | Description |
 |--------------|-------------|
 |files=/path/to/ce1sus/files                           | The absolute file path where ce1sus can store/archive the| 
-|                                                      |  uploaded files as attributes.|
+|                                                      |  uploaded files as attributes, if the path/file does not exist it will be created|
 |                                                      |  The user (i.e 'www-data') of ce1sus must have access on that directory|
 
 **[CVEHandler]**
@@ -337,7 +352,7 @@ The following sections have to be modified to the settings of your system
 |variable name | Description |
 |--------------|-------------|
 |files=/path/to/ce1sus/reference_files                 | The absolute file path where ce1sus can store/archive the| 
-|                                                      |  uploaded files in the refrence section.|
+|                                                      |  uploaded files in the refrence section, if the path/file does not exist it will be created|
 |                                                      |  The user (i.e 'www-data') of ce1sus must have access on that directory|
 
 **[FileWithHashesHandler]**
@@ -345,7 +360,7 @@ The following sections have to be modified to the settings of your system
 |variable name | Description |
 |--------------|-------------|
 |files=/path/to/ce1sus/files                            | The absolute file path where ce1sus can store/archive the| 
-|                                                       | uploaded files as attributes.|
+|                                                       | uploaded files as attributes, if the path/file does not exist it will be created|
 |                                                       | The user (i.e 'www-data') of ce1sus must have access on that directory|
 
 ###1.4.2 Cherrypy.conf
@@ -407,7 +422,7 @@ Errors during stat:
 
 Install uwsgi and uwsgi-plugin-python
 ``` shell
-apt-get install uwsgi uwgsi-plugin-python
+apt-get install uwsgi uwsgi-plugin-python
 ``` 
 
 In the config folder of your ce1sus installation folder you'll find ce1sus.ini_tmpl a template for the configuration of 
@@ -443,7 +458,7 @@ In the config folder of your ce1sus installation folder you'll find ce1sus_tmpl 
 Copy the file to uwsgi:
 
 ``` shell
-cp scripts/install/nginx/ce1sus_tmpl config/ce1sus.conf /etc/nginx/sites-available/ce1sus
+cp scripts/install/nginx/ce1sus_tmpl /etc/nginx/sites-available/ce1sus
 ``` 
 Create a self signed certificate for ce1sus:
 
