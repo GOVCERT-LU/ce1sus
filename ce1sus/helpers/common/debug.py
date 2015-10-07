@@ -5,13 +5,11 @@ Debugging module
 
 Created: Jul, 2013
 """
+from ce1sus.helpers.common.syslogger import Syslogger
 import logging
 from logging.handlers import RotatingFileHandler
-from os import makedirs
+from os import makedirs, utime
 from os.path import exists, dirname
-
-from ce1sus.helpers.common.syslogger import Syslogger
-
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -82,7 +80,12 @@ class Log(object):
 
     if self.log_file:
       if not exists(self.log_file):
-          makedirs(self.log_file)
+        # create folder
+        folder = dirname(self.log_file)
+        makedirs(folder)
+        # create file
+        with open(self.log_file, 'a'):
+          utime(self.log_file, None)
 
     # create formatter
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
