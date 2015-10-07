@@ -18,6 +18,7 @@ sys.path.insert(0, '../../../')
 from ce1sus.common.dbinit import dbinit
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.db.classes.ccybox.common.measuresource import MeasureSource
+from ce1sus.db.classes.cstix.extensions.test_mechanism.generic_test_mechanism import GenericTestMechanism
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'

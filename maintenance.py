@@ -24,7 +24,9 @@ from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.handlers.base import HandlerBase
-
+from ce1sus.db.classes.cstix.extensions.test_mechanism.generic_test_mechanism import GenericTestMechanism
+from ce1sus.common.classes.cacheobject import CacheObject
+from ce1sus.controllers.common.permissions import PermissionController
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -52,6 +54,7 @@ class Maintenance(object):
     self.user_controller = UserController(config, directconnection)
     self.reference_controller = ReferencesController(config, directconnection)
     self.conditions_controller = ConditionController(config, directconnection)
+    self.permission_controller = PermissionController(config, directconnection)
     self.verbose = False
 
     # set maintenance user
@@ -180,38 +183,47 @@ class Maintenance(object):
     else:
       raise MaintenanceException('Class {0}.{1} does not implement HandlerBase'.format(modulename, classname))
 
+  def get_cache_object(self):
+    cache_object = CacheObject()
+    cache_object.complete = True
+    cache_object.inflated = True
+    cache_object.permission_controller = self.permission_controller
+    cache_object.user = self.user
+    return cache_object
+
   def dump_definitions(self, dump_def, dump_dest):
     # check if file exists
     if isfile(dump_dest):
       raise MaintenanceException('File {0} is already existing'.format(dump_dest))
+    cache_object = self.get_cache_object()
 
     dump = list()
     if dump_def == 'attributes':
       attributes = self.attribute_definition_controller.get_all_attribute_definitions()
       for attribute in attributes:
-        dump.append(attribute.to_dict(True, True))
+        dump.append(attribute.to_dict(cache_object))
     elif dump_def == 'objects':
       obejcts = self.object_definition_controller.get_all_object_definitions()
       for obj in obejcts:
-        dump.append(obj.to_dict(True, True))
+        dump.append(obj.to_dict(cache_object))
     elif dump_def == 'references':
       ref_defs = self.reference_controller.get_reference_definitions_all()
       for ref_def in ref_defs:
-        dump.append(ref_def.to_dict(True, True))
+        dump.append(ref_def.to_dict(cache_object))
     elif dump_def == 'conditions':
       conditions = self.conditions_controller.get_all_conditions()
       for condition in conditions:
-        dump.append(condition.to_dict(True, True))
+        dump.append(condition.to_dict(cache_object))
     elif dump_def == 'types':
       types = self.attribute_definition_controller.get_all_types()
       for type_ in types:
-        dump.append(type_.to_dict(True, True))
+        dump.append(type_.to_dict(cache_object))
     else:
       raise MaintenanceException('No definition assigned to {0}. It can either be attributes or objects'.format(dump_def))
 
     # open an dump to file
     dump_file = open(dump_dest, 'w+')
-    dump_file.write(json.dumps(dump))
+    dump_file.write(json.dumps(dump, sort_keys=True, indent=4, separators=(',', ': ')))
     dump_file.close()
 
 if __name__ == '__main__':
