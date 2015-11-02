@@ -110,8 +110,7 @@ One possibility to install OpenIOC is the following
 
 ``` shell
 mkdir libs
-mkdir libs
-git -C libs clone https://github.com/STIXProject/openioc-to-stix.git
+git -C libs clone https://github.com/jhemp/openioc-to-stix.git
 ln -s libs/openioc-to-stix/ioc_observable.py .
 ln -s libs/openioc-to-stix/openioc.py .
 ln -s libs/openioc-to-stix/openioc_to_cybox.py .
