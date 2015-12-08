@@ -41,9 +41,10 @@ class ChildObjectDefintion(SimpleLoggingInformations, Base):
 
   parent_id = Column('parent_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   list_type = Column('list_type', Boolean, nullable=False, default=False)
+  attribute = Column('attribute', UnicodeType(255), nullable=False, index=True)
   child_id = Column('child_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', primaryjoin='ChildObjectDefintion.child_id==ObjectDefinition.identifier')
-  UniqueConstraint('parent_id', 'child_id')
+  UniqueConstraint('parent_id', 'child_id', 'attribute')
 
   def validate(self):
     return True
@@ -51,7 +52,9 @@ class ChildObjectDefintion(SimpleLoggingInformations, Base):
   def to_dict(self, cache_object):
     instance = self.get_populated(cache_object)
     result = {
-            'options': {'list_type': instance.convert_value(instance.list_type)},
+            'options': {'list_type': instance.convert_value(instance.list_type),
+                        'attribute': instance.convert_value(instance.attribute),
+                        },
             'definition': instance.attribute_to_dict(instance.definition, cache_object),
             }
 
@@ -114,7 +117,6 @@ class ObjectDefinition(SimpleLoggingInformations, Base):
 
     parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
-
 
 
 class AttributeDefinition(SimpleLoggingInformations, Base):

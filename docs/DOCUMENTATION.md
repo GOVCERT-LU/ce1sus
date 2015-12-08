@@ -53,6 +53,7 @@ One possibility to install python-magic is the following
 Go to your ce1sus installation directory and:
 
 ``` shell
+cd ce1sus
 mkdir libs
 git -C libs clone https://github.com/ahupp/python-magic
 ln -s libs/python-magic/magic.py .
@@ -65,6 +66,7 @@ The important fact is that the magic package must be accessible with "import mag
 One possibility to install eml_parser is the following
 
 ``` shell
+cd ce1sus
 mkdir libs
 git -C libs clone https://github.com/sim0nx/eml_parser
 ln -s libs/eml_parser/eml_parser .
@@ -75,6 +77,7 @@ ln -s libs/eml_parser/eml_parser .
 One possibility to install Cybox is the following
 
 ``` shell
+cd ce1sus
 mkdir libs
 git -C libs clone https://github.com/CybOXProject/python-cybox.git
 git -C libs/python-cybox checkout 03beb70618c83071cd7db77d26eb0752ab3bc22a # checkout v2.1.0.11
@@ -88,6 +91,7 @@ The other is it to install it via pip.
 One possibility to install Stix is the following
 
 ``` shell
+cd ce1sus
 mkdir libs
 git -C libs clone https://github.com/STIXProject/python-stix.git
 git -C libs/python-stix checkout 92f610076ad982b7577ede97f8f26982265e254b # checkout v1.1.1.5
@@ -99,6 +103,7 @@ ln -s libs/python-stix/stix .
 One possibility to install rtKit is the following
 
 ``` shell
+cd ce1sus
 mkdir libs
 git -C libs clone https://github.com/z4r/python-rtkit.git
 git -C libs/python-rtkit checkout 78306d1a44080adca2e302b429beabd3d578a211 # checkout v0.6.0
@@ -110,6 +115,7 @@ ln -s libs/python-rtkit/rtkit .
 One possibility to install OpenIOC is the following
 
 ``` shell
+cd ce1sus
 mkdir libs
 git -C libs clone https://github.com/jhemp/openioc-to-stix.git
 ln -s libs/openioc-to-stix/ioc_observable.py .
@@ -149,6 +155,7 @@ FLUSH PRIVILEGES;
 The creation of the db schema changed since 0.11.X and is now done via a script. Before executing db_init.py, copy and edit config files located in config/. Afterwards, you can initialize the database using db_init.py:
 
 ``` shell
+cd ce1sus
 cd scripts/install/database
 python db_init.py
 ```
@@ -257,7 +264,7 @@ The **[Plugins]** section defines which "Plugins" are available to use
 |--------------|-------------|
 |LdapPlugin=[Yes,No]                                    | Enables the Ldap plugin|
 |                                                       | **Note**: If the ldapplugin is activated the section LDAP and the useldap|
-|                                                      |        in the ce1sus section have to be set|
+|                                                       |        in the ce1sus section have to be set|
 |MailPlugin=[Yes,No]                                    | Enables the mail plugin|
 |                                                       |  **Note**: If the mail plugin is not enabled no mails will be send out, this has no impact except that new users have to be activated manually.|
 

@@ -43,6 +43,7 @@ MAPED_ATTRIBUTES = {
                     'Process_name': 'Process_name',
                     'WinHandle_type_': 'WinHandleType',
                     'WinHandle_name': 'WinHandle_name',
+                    'WinRegistryKey_key': 'WinRegistryKey_key'
                     }
 
 
@@ -164,12 +165,13 @@ class CyboxConverter(BaseController):
             if definition:
               attribute = self.map_attribute(definition, '{0}'.format(value), parent, cache_object)
               parent.attributes.append(attribute)
+              
           elif isinstance(value, cybox.EntityList):
             for item in value:
-              entity = self.map_entity(item, cache_object, parent, int_cybox_struct)
+              entity = self.map_entity(None, item, cache_object, parent, int_cybox_struct)
               parent.objects.append(entity)
           elif isinstance(value, cybox.Entity):
-            entity = self.map_entity(value, cache_object, parent, int_cybox_struct)
+            entity = self.map_entity(field, value, cache_object, parent, int_cybox_struct)
             parent.objects.append(entity)
           elif isinstance(value, list):
             for item in value:
@@ -219,13 +221,14 @@ class CyboxConverter(BaseController):
 
     return obj
 
-  def map_entity(self, instance, cache_object, parent, cybox_struct=None):
+  def map_entity(self, field, instance, cache_object, parent, cybox_struct=None):
     if isinstance(instance, cybox.common.ObjectProperties):
       # this will get a sub object
       obj = Object()
       obj.parent = parent
       self.set_base(obj, cache_object, parent=parent)
-      obj.id_ = instance.id_
+      if hasattr(instance, 'id'):
+        obj.id_ = instance.id_
       if hasattr(instance, 'idref'):
         obj.idref = instance.idref
       if obj.idref is None:
@@ -234,7 +237,16 @@ class CyboxConverter(BaseController):
         self.map_properties(instance, cache_object, obj)
         return obj
     else:
-      raise Exception()
+      # in this case it is a special container which normally can be mapped on an attribute
+      if field:
+        int_cybox_struct = self.get_cybox_structure(field, instance, cybox_struct)
+        if int_cybox_struct not in NOT_MAPPED:
+          definition = self.get_attribute_definition(field, cache_object, int_cybox_struct)
+          if definition:
+            attribute = self.map_attribute(definition, '{0}'.format(instance), parent, cache_object)
+            parent.attributes.append(attribute)
+      else:
+        raise CyboxConverterException('Field was not specified')
 
 
     pass

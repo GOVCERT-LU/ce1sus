@@ -192,7 +192,8 @@ class Ce1susAssembler(BaseAssembler):
 
       user.notifications = json.get('notifications', None)
       # permissions setting
-      self.permissions = self.assemble_user_permissions(json.get('permissions', '0'), user, cache_object)
+      permissions = self.assemble_user_permissions(json.get('permissions', '0'), user, cache_object)
+      user.dbcode = permissions.bit_code
       if self.salt:
         salt = self.salt
       else:

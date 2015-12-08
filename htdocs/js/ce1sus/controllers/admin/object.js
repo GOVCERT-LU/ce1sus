@@ -53,7 +53,7 @@ app.controller("objectDetailController", function($scope, $injector, Restangular
   
   $scope.associated = $scope.object.objects;
   
-  $scope.options = {"list_type": false};
+  $scope.options = {"list_type": false, "attribute": ''};
   
   $scope.remaining = angular.copy($scope.allItems);
   

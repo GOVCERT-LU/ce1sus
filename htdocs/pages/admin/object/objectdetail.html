@@ -81,9 +81,18 @@
     <div class="row">
       <label class="col-lg-3 control-label text-right">List Type</label>
       <div class="col-lg-9">
-        <input type="checkbox" name="add" value="add"
+        <input type="checkbox" name="list"
           ng-model="options.list_type"
           ng-disabled="multiple">
+
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Attribute name:</label>
+      <div class="col-lg-9">
+        <input type="text" name="attribute" value="attribute"
+          ng-model="options.attribute">
 
       </div>
     </div>
