@@ -60,7 +60,6 @@ class Attribute(BaseElement, Base):
 
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
-  condition_id = Column('condition_id', BigIntegerType, ForeignKey('conditions.condition_id', ondelete='restrict', onupdate='restrict'), index=True, default=None)
   condition = relationship(Condition, uselist=False, secondary=_REL_ATTRIBUTE_CONDITIONS)
 
   _PARENTS = ['object']
@@ -171,7 +170,7 @@ class Attribute(BaseElement, Base):
     
     condition = None
     condition_id = None
-    if cache_object.complete and instance.condition:
+    if instance.condition:
       condition = instance.condition.to_dict(cache_object)
       condition_id = instance.convert_value(instance.condition.uuid)
 

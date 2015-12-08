@@ -95,7 +95,7 @@ app.controller("viewEventController", function($scope, Restangular, messages,
 });
 
 app.controller("eventObservableController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location,observables, $anchorScroll, $filter, ngTableParams) {
+    $log, $routeSegment, $location,observables, $anchorScroll, $filter, ngTableParams, $modal) {
   $scope.permissions=$scope.event.userpermissions;
   
   function getAttributes(){
@@ -105,12 +105,17 @@ app.controller("eventObservableController", function($scope, Restangular, messag
       if (object.attributes.length > 0) {
         for (var i = 0; i < object.attributes.length; i++) {
           item = {};
+          item.identifier = object.attributes[i].identifier;
           item.value = object.attributes[i].value;
           item.definition = object.attributes[i].definition;
           item.ioc = object.attributes[i].ioc;
           item.shared = object.attributes[i].shared;
-          item.object = object.definition.name;
+          item.object = object;
+          item.objectdefname = object.definition.name;
           item.observable = observable.title;
+          item.definition_id = object.attributes[i].definition_id;
+          item.condition_id = object.attributes[i].condition_id;
+          item.condition = object.attributes[i].condition;
           if (object.attributes[i]){
             item.properties = object.attributes[i].properties;
           } else {
@@ -131,7 +136,8 @@ app.controller("eventObservableController", function($scope, Restangular, messag
       } else {
         item = {};
         item.observable = observable.title;
-        item.object = object.definition.name;
+        item.object = object;
+        item.objectdefname = object.definition.name;
         item.value = 'No attributes were definied';
         attributes.push(item);
       }
@@ -190,6 +196,34 @@ app.controller("eventObservableController", function($scope, Restangular, messag
         
       }
     }
+  };
+  
+  $scope.removeAttribute = function(attribute){
+    if (confirm('Are you sure you want to delete this attribute?')) {
+      restangularAttribute = Restangular.restangularizeElement(null, attribute, 'object/'+attribute.object.identifier+'/attribute');
+      restangularAttribute.remove().then(function (data) {
+        if (data) {
+          var index = $scope.$data.indexOf(attribute);
+          $scope.$data.splice(index, 1);
+          
+          messages.setMessage({'type':'success','message':'Attribute sucessfully removed'});
+        }
+      }, function (response) {
+        handleError(response, messages);
+      });
+
+    }
+  };
+  $scope.showAttributeDetails = function(attribute){
+    $scope.attributeDetails = attribute;
+    $scope.object = attribute.object;
+    $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/details.html', show: true});
+  };
+  
+  $scope.editAttribute = function(attribute){
+    $scope.attributeDetails = attribute;
+    $scope.object = attribute.object;
+    $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/edit.html', show: true});
   };
   
   $scope.showFlat=function(){

@@ -312,11 +312,15 @@ class AttributeHandlerBase(HandlerBase):
     # set definition id
 
     condition_uuid = json.get('condition_id', None)
+    if not condition_uuid:
+      condition = json.get('condition', None)
+      if condition:
+        condition_uuid = condition.get('identifier', None)
+    
     # set condition id
     if condition_uuid:
       condition = self.get_condition_by_uuid(condition_uuid)
       attribute.condition = condition
-      attribute.condition_id = condition.identifier
 
     attribute.is_ioc = json.get('ioc', 0)
     attribute.value = json.get('value', None)

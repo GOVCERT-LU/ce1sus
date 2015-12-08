@@ -53,8 +53,8 @@ class Ce1susMISP(BaseController):
     root = etree.Element('Event')
     self.__append_child(root, 'id', event.identifier)
 
-    self.__append_child(root, 'org', event.stix_header.information_source.identity.name)
     
+
     self.__append_child(root, 'date', event.created_at.date())
     risk_id = 4
     for key, value in RISK_MAP.iteritems():
@@ -83,7 +83,9 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'distribution', self.get_distribution(event))
     self.__append_child(root, 'proposal_email_lock', 0)
     
-    self.__append_child(root, 'orgc', event.creator.group.name)
+    self.__append_child(root, 'org', event.creator.group.name)
+    self.__append_child(root, 'orgc', event.stix_header.information_source.identity.name)
+
     self.__append_child(root, 'locked', 0)
     
     if event.last_publish_date:

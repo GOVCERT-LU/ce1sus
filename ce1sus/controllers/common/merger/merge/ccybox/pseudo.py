@@ -6,6 +6,7 @@
 Created on Aug 12, 2015
 """
 from ce1sus.controllers.common.merger.base import BaseMerger, MergerException
+from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -14,6 +15,20 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 class PseudoCyboxMerger(BaseMerger):
+
+  def __init__(self, config, session=None):
+    super(PseudoCyboxMerger, self).__init__(config, session)
+    self.condition_broker = self.broker_factory(ConditionBroker)
+
+  def get_condition(self, uuid, cache_object):
+    definition = cache_object.seen_conditions.get(uuid, None)
+    if definition:
+      return definition
+    else:
+      # TODO: catch exceptions
+      definition = self.condition_broker.get_by_uuid(uuid)
+      cache_object.seen_conditions[uuid] = definition
+      return definition
 
   def merge_object(self, old_instance, new_instance, merge_cache, attr_name=None):
     old_value, new_value = self.get_values(old_instance, new_instance, attr_name)
@@ -51,10 +66,23 @@ class PseudoCyboxMerger(BaseMerger):
       if merge_cache.result == 1:
         self.update_instance_value(old_value, new_value, 'value', merge_cache)
         self.update_instance_value(old_value, new_value, 'is_ioc', merge_cache)
-        self.update_instance_value(old_value, new_value, 'condition_id', merge_cache)
+        
         self.set_base(old_value, new_value, merge_cache)
 
       elif merge_cache.result == 0:
         self.set_value(old_instance, new_value, attr_name, merge_cache)
+      
+      self.merge_confidence(old_instance, new_instance, merge_cache, 'condition')
+      
 
     return merge_cache.version
+  
+  def merge_confidence(self, old_instance, new_instance, merge_cache, attr_name=None):
+    new_value = self.get_values(old_instance, new_instance, attr_name)[1]
+    if new_value:
+      old_instance.condition = self.get_condition(new_value.uuid, merge_cache)
+    else:
+      old_instance.condition = None
+    return merge_cache.version
+
+

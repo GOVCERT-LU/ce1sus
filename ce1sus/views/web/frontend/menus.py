@@ -179,7 +179,7 @@ class GuiMenus(BaseView):
       child_menu_item['title'] = 'Profile'
       child_menu_item['section'] = 'user/profile'
       child_menus.append(child_menu_item)
-
+      """
       if user.permissions.manage_group:
         child_menu_item = dict()
         child_menu_item['divider'] = True
@@ -189,7 +189,7 @@ class GuiMenus(BaseView):
         child_menu_item['title'] = 'Group Mgt'
         child_menu_item['section'] = 'user/group'
         child_menus.append(child_menu_item)
-
+      """
       menu_item['submenus'] = child_menus
 
       menus.append(menu_item)

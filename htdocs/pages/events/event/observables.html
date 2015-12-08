@@ -44,8 +44,8 @@
             </span>
             
           </td>
-          <td data-title="'Object'" filter="{ 'object': 'text' }" sortable="'object'" width="5%">
-            {{attributeflat.object}}
+          <td data-title="'Object'" filter="{ 'objectdefname': 'text' }" sortable="'objectdefname'" width="5%">
+            {{attributeflat.objectdefname}}
           </td>
           <td data-title="'Type'" filter="{ 'definition.name': 'text' }" sortable="'definition.name'" width="16%">
             {{attributeflat.definition.name}}
@@ -55,6 +55,10 @@
           </td>
           <td data-title="'IOC'" filter="{ 'ioc': 'text' }" sortable="'ioc'" width="2%">
             <span ng-if="attributeflat.ioc" class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>
+          </td>
+          <td data-title="'Options'"width="2%">
+                <a class="hand" ng-click="showAttributeDetails(attributeflat)"><span class="glyphicon glyphicon-eye-open"></span></a>
+                <a class="hand" ng-click="editAttribute(attributeflat)"><span class="glyphicon glyphicon-pencil" ng-show="permissions.modify"></span></a>
           </td>
         </tr>
       </tbody>

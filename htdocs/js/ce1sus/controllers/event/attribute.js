@@ -59,7 +59,7 @@ app.controller("objectAttributeEditController", function($scope, Restangular, me
   var original_attribute = angular.copy($scope.attributeDetails);
   $scope.attribute=angular.copy(original_attribute);
 
-  Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (attributes) {
+  Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attribute",{"complete": true}).then(function (attributes) {
     $scope.definitions = attributes;
   }, function(response) {
     handleError(response, messages);
